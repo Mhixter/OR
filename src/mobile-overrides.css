@@ -2419,3 +2419,41 @@
     font-size: 8px;
   }
 }
+
+.unavailable-state {
+  margin-top: 8px;
+}
+
+.unavailable-state .eyebrow {
+  display: block;
+  color: var(--orange);
+  margin-bottom: 7px;
+}
+
+.unavailable-state .primary-button {
+  margin-top: 18px;
+}
+
+.compact-empty {
+  padding: 34px 20px;
+}
+
+.notification-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+  padding: 22px 4px;
+}
+
+.connection-pill.disconnected {
+  color: var(--muted);
+  background: #f0f1f1;
+}
+
+.connection-pill.disconnected .live-dot {
+  background: var(--muted-light);
+  box-shadow: none;
+}

@@ -1,0 +1,402 @@
+Analyze the real “Orange Money Pay Burkina Faso” merchant application using all publicly available information, screenshots, app metadata, feature descriptions, and UI evidence available on MWM AI and the official Google Play/App Store listings.
+
+I want you to create a COMPLETE screen-by-screen UI/UX design specification for the application.
+
+IMPORTANT:
+
+- Do not give me only a general description.
+- Identify every screen, sub-screen, modal, bottom sheet, confirmation screen, empty state, loading state, error state, success state, and important interaction that can be reasonably established from the available evidence.
+- Separate screens that are directly visible/documented from screens whose existence/functionality is confirmed but whose exact visual layout must be reconstructed.
+- Do not invent features and present them as confirmed Orange Money Pay features.
+- Use the real Orange Money Pay Burkina Faso merchant application as the primary reference.
+- Do not confuse it with the consumer Orange Money Burkina Faso wallet.
+- Focus specifically on the MERCHANT application.
+
+FIRST, RESEARCH AND ANALYZE:
+
+1. MWM AI's Orange Money Pay Burkina Faso page
+2. Official Google Play listing
+3. Official Apple App Store listing
+4. Publicly available screenshots
+5. App descriptions
+6. Feature lists
+7. Version/update notes
+8. Any publicly documented navigation or interaction information
+
+Then produce a COMPLETE UI reconstruction/design specification.
+
+ORGANIZE THE RESULT INTO THESE SECTIONS:
+
+1. APP INFORMATION
+
+Provide:
+
+- App name
+- Developer
+- Platform
+- Country
+- Target users
+- Main purpose
+- Merchant vs consumer distinction
+- Latest publicly documented version
+- Major documented features
+
+2. COMPLETE SCREEN INVENTORY
+
+Create a numbered list of EVERY identifiable screen.
+
+For each screen provide:
+
+SCREEN NUMBER:
+SCREEN NAME:
+EVIDENCE LEVEL:
+
+- Directly visible
+- Officially documented functionality
+- Strong reconstruction
+- Speculative / not confirmed
+
+PURPOSE:
+Explain what the screen does.
+
+UI STRUCTURE:
+Describe the exact layout from top to bottom.
+
+HEADER:
+
+- Title
+- Back button
+- Notification icon
+- Profile icon
+- Other controls
+
+MAIN CONTENT:
+Describe every card, button, input, icon, amount, label, tab, list, QR code, chart, etc.
+
+PRIMARY ACTION:
+What is the main button/action?
+
+SECONDARY ACTIONS:
+List all other actions.
+
+NAVIGATION:
+Explain where the user can go from this screen.
+
+STATES:
+Include:
+
+- Normal
+- Loading
+- Empty
+- Error
+- Success
+- Disabled
+- Offline if applicable
+
+3. NAVIGATION ARCHITECTURE
+
+Create the complete navigation map.
+
+Example:
+
+Splash
+↓
+Authentication
+↓
+Home Dashboard
+├── Encaisser
+├── Transfert
+├── QR
+├── Activité
+├── Caisse
+├── Revenus
+├── Rapports
+├── Notifications
+└── Profil
+
+Show all branches and sub-branches.
+
+4. HOME/DASHBOARD
+
+Pay special attention to reconstructing the real merchant dashboard.
+
+Use the publicly documented elements such as:
+
+- Personalized greeting
+- Compte principal
+- Balance
+- Encaisser
+- Transfert
+- QR code
+- Merchant activity
+- Revenue/business information
+- Other confirmed dashboard components
+
+Explain their:
+
+- Position
+- Size
+- hierarchy
+- spacing
+- interaction
+- navigation
+
+5. ENCAISSER FLOW
+
+Document the complete payment collection flow:
+
+Home
+→ Encaisser
+→ Amount
+→ Customer/payment information
+→ Confirmation
+→ Authentication
+→ Processing
+→ Successful payment
+→ Receipt
+→ Transaction details
+
+Only include steps supported by evidence or clearly mark reconstructed steps.
+
+6. TRANSFER FLOW
+
+Include:
+
+- Transfer screen
+- Account selection
+- Beneficiary
+- Amount
+- Fees
+- Confirmation
+- Authentication
+- Processing
+- Success
+- Failure
+- Transfer receipt
+- Transfer history
+
+Pay particular attention to the documented “account selection during transfers” feature.
+
+7. QR PAYMENT
+
+Document:
+
+- Merchant QR
+- QR display
+- QR sharing
+- QR scanning if supported
+- Payment confirmation
+- Successful payment
+- Failed payment
+
+8. CASH REGISTER
+
+Investigate and document all publicly supported cash-register functionality.
+
+Include:
+
+- Cash register dashboard
+- Opening
+- Initial balance
+- Transactions
+- Closing
+- Cash-register history
+- Daily totals
+- Differences/discrepancies
+- Empty/loading/error states
+
+Clearly distinguish confirmed functionality from reconstructed UI.
+
+9. SALES / COLLECTIONS
+
+Document:
+
+- Sales dashboard
+- Collection history
+- Sale details
+- Customer/payment information
+- Daily sales
+- Weekly sales
+- Monthly sales
+- Filtering
+- Search
+- Transaction details
+
+10. REVENUE / PERFORMANCE
+
+Use the documented merchant revenue and performance functionality.
+
+Design:
+
+- Revenue dashboard
+- Total turnover
+- Transaction count
+- Performance indicators
+- Charts
+- Time filters
+- Daily/weekly/monthly views
+- Reports
+
+11. MERCHANT ACTIVITY
+
+Document the merchant activity area mentioned in the latest app version.
+
+Include:
+
+- Timeline
+- Payments
+- Transfers
+- Login/activity events
+- Merchant operations
+- Filters
+- Details
+
+12. SCAN / VERIFICATION
+
+Document the newly mentioned scan verification functionality.
+
+Include:
+
+- Scanner
+- Camera permission
+- QR/code scanning
+- Verification result
+- Successful verification
+- Failed verification
+- Manual verification fallback if supported
+
+13. MERCHANT ACCOUNT CREATION
+
+Document the new in-app merchant account creation flow.
+
+Include:
+
+- Registration
+- Merchant information
+- Business information
+- Verification
+- Confirmation
+- Account-created success screen
+
+14. PROFILE AND SETTINGS
+
+Document:
+
+- Merchant profile
+- Business details
+- Account information
+- Security
+- Notifications
+- Language
+- Help
+- Terms
+- Logout
+
+15. SYSTEM STATES
+
+Create UI specifications for:
+
+- Loading
+- Empty state
+- Network error
+- Transaction pending
+- Transaction failed
+- Transaction successful
+- Session expired
+- Invalid PIN
+- Invalid OTP
+- Insufficient balance
+- QR scan failure
+- Server error
+- Maintenance mode
+
+16. DESIGN SYSTEM
+
+Based on the publicly visible Orange Money Pay Burkina Faso interface, identify:
+
+COLORS:
+
+- Primary orange
+- Secondary colors
+- Background
+- Cards
+- Text
+- Success
+- Error
+- Warning
+
+TYPOGRAPHY:
+
+- Font style
+- Heading sizes
+- Body sizes
+- Number/balance typography
+
+COMPONENTS:
+
+- Buttons
+- Cards
+- Inputs
+- Tabs
+- Bottom navigation
+- Top navigation
+- Bottom sheets
+- Modals
+- QR components
+- Transaction cards
+- Charts
+
+SPACING:
+Describe approximate padding, margins and card spacing.
+
+BORDERS:
+Describe radius, dividers and borders.
+
+ICONS:
+Describe icon style and placement.
+
+17. SCREEN-BY-SCREEN WIREFRAMES
+
+For EVERY screen, provide a simple mobile wireframe showing approximately where every component belongs.
+
+Use a structure like:
+
+┌───────────────────────────┐
+│ Header                    │
+├───────────────────────────┤
+│                           │
+│ Main content              │
+│                           │
+│ Card                      │
+│                           │
+│ Button                    │
+│                           │
+├───────────────────────────┤
+│ Bottom navigation         │
+└───────────────────────────┘
+
+Do this for every important screen.
+
+18. FINAL COMPLETE SCREEN LIST
+
+At the end, provide a clean numbered inventory containing:
+
+1. Screen name
+2. Screen purpose
+3. Evidence level
+4. Entry point
+5. Exit/navigation destinations
+
+Do NOT force the number to exactly 32.
+
+If the real application has fewer or more screens, report the actual number you can establish.
+
+MOST IMPORTANT:
+I want a realistic reconstruction of the Orange Money Pay Burkina Faso MERCHANT app based on publicly available evidence, not a generic African fintech wallet.
+
+Do not copy proprietary logos, illustrations, copyrighted assets, or exact pixel-level designs. Use the real application only as a UI/UX reference and create an original implementation specification with the same general merchant workflow and information architecture.
+Answers saved by yourProduct Manager
+View
+The question card is up — once you answer, I'll turn it into a concrete plan for approval.
+
+One warm sentence before proposing — here's the consolidated plan for the merchant app, ready for your review.

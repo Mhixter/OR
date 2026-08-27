@@ -1,0 +1,2398 @@
+/* Loaded after the desktop stylesheet so the phone composition wins the cascade. */
+.mobile-orange-money-page {
+  display: none;
+}
+
+.mobile-avatar-icon {
+  display: none;
+}
+
+.orange-money-logo {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 22px;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  line-height: 1;
+}
+
+.orange-money-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.orange-qr-logo {
+  display: block;
+  width: 24px;
+  height: 19px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.qr-center-mark.orange-qr-center {
+  display: grid;
+  place-items: center;
+  gap: 0;
+  padding: 0;
+  border-width: 4px;
+}
+
+.qr-center-mark.orange-qr-center .orange-qr-logo {
+  width: 28px;
+  height: 24px;
+}
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-shell .main-shell {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0 !important;
+  }
+
+  .app-shell .dashboard-shell .main-content {
+    padding: 8px 14px calc(78px + env(safe-area-inset-bottom));
+    background: #fff;
+  }
+
+  .app-shell .dashboard-topbar {
+    height: 58px;
+    padding: 0 14px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+
+  .app-shell .dashboard-topbar .menu-trigger {
+    display: grid !important;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+
+  .app-shell .dashboard-topbar .topbar-heading {
+    display: none !important;
+  }
+
+  .app-shell .dashboard-topbar .mobile-topbar-brand {
+    display: inline-flex !important;
+  }
+
+  .app-shell .dashboard-topbar .connection-pill {
+    display: none !important;
+  }
+
+  .app-shell .mobile-balance-card::after,
+  .app-shell .mobile-qr-caption {
+    pointer-events: none;
+  }
+
+  .app-shell .mobile-balance-copy button {
+    position: relative;
+    z-index: 3;
+  }
+
+  .app-shell .mobile-nav {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell .dashboard-topbar {
+    height: 70px;
+    border-bottom: 0;
+  }
+
+  .app-shell .dashboard-topbar .topbar-actions {
+    gap: 0;
+  }
+
+  .app-shell .dashboard-topbar .topbar-actions .icon-button {
+    width: 38px;
+    height: 42px;
+  }
+
+  .app-shell .dashboard-topbar .profile-button {
+    padding: 0 0 0 3px;
+  }
+
+  .app-shell .dashboard-topbar .profile-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #d5d5d5;
+    color: #fff;
+    font-size: 0;
+  }
+
+  .app-shell .dashboard-topbar .profile-avatar::after {
+    content: none;
+  }
+
+  .app-shell .dashboard-topbar .profile-initials {
+    display: none;
+  }
+
+  .app-shell .dashboard-topbar .mobile-avatar-icon {
+    display: block;
+    color: #fff;
+  }
+
+  .app-shell .dashboard-topbar .notification-badge {
+    top: 1px;
+    right: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 2px solid #fff;
+    font-size: 9px;
+  }
+
+  .app-shell .mobile-dashboard {
+    padding-bottom: 10px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-greeting {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 3px 2px 14px;
+    font-size: 22px;
+    line-height: 1.12;
+    letter-spacing: -0.045em;
+  }
+
+  .app-shell .mobile-dashboard .mobile-greeting strong {
+    color: var(--orange);
+    font-size: 25px;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+  }
+
+  .app-shell .mobile-dashboard .mobile-balance-card {
+    grid-template-columns: minmax(112px, 38%) minmax(0, 1fr);
+    gap: 15px;
+    min-height: 180px;
+    padding: 14px 14px 20px;
+    border-radius: 17px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-qr-thumb {
+    width: 100%;
+    max-width: 148px;
+    height: auto;
+    aspect-ratio: 1;
+    align-self: center;
+    padding: 6px;
+    border-radius: 13px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-qr-thumb .qr-graphic {
+    width: 100%;
+    height: 100%;
+    gap: 1px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-qr-thumb .qr-center-mark {
+    width: 25px;
+    height: 25px;
+    border-width: 4px;
+    border-radius: 6px;
+    padding-bottom: 6px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-qr-caption {
+    left: 20px;
+    bottom: 7px;
+    width: min(125px, 32%);
+    font-size: 9px;
+    padding: 3px 1px;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-balance-copy {
+    padding-top: 8px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-balance-label {
+    gap: 7px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-dashboard .mobile-mini-mark {
+    width: 17px;
+    height: 17px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-balance-value {
+    gap: 7px;
+    margin-top: 20px;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-dashboard .mobile-transactions {
+    gap: 4px;
+    margin-top: 22px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-dashboard .mobile-credit-row {
+    min-height: 63px;
+    padding: 0 20px;
+    margin-top: 18px;
+    border-radius: 14px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-credit-row > span:first-child {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-dashboard .mobile-credit-value {
+    gap: 7px;
+    font-size: 15px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-shortcuts {
+    gap: 2px;
+    margin-top: 23px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-shortcut-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 21px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-shortcut-icon svg {
+    width: 25px;
+    height: 25px;
+    stroke-width: 1.8;
+  }
+
+  .app-shell .mobile-dashboard .mobile-shortcuts button > span:last-child {
+    max-width: 78px;
+    min-height: 35px;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offers {
+    margin-top: 20px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-section-heading {
+    margin-bottom: 12px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-section-heading h2 {
+    font-size: 21px;
+    letter-spacing: -0.045em;
+  }
+
+  .app-shell .mobile-dashboard .mobile-section-heading button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-hero {
+    height: 92px;
+    gap: 12px;
+    padding: 0 18px;
+    border-radius: 16px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 2;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-copy strong {
+    font-size: 16px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-copy small {
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-arrow {
+    position: absolute;
+    right: 16px;
+    z-index: 2;
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-grid {
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 9px;
+    margin-top: 16px;
+  }
+
+  .app-shell .mobile-dashboard .mobile-offer-tile {
+    height: 119px;
+    border-radius: 14px;
+    padding: 10px;
+  }
+
+  .app-shell .mobile-dashboard .offer-uefa {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .app-shell .mobile-dashboard .offer-uefa strong {
+    font-size: 11px;
+    line-height: 1.08;
+  }
+
+  .app-shell .mobile-dashboard .offer-uefa span {
+    width: max-content;
+    border-radius: 14px;
+    background: #6f27c6;
+    padding: 5px 10px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-dashboard .offer-orange,
+  .app-shell .mobile-dashboard .offer-market {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 5px;
+    background: #fff;
+    border: 1px solid #ece9e6;
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .app-shell .mobile-dashboard .offer-tile-icon {
+    color: var(--orange);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .app-shell .mobile-dashboard .offer-orange strong,
+  .app-shell .mobile-dashboard .offer-market strong {
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  .app-shell .mobile-dashboard .offer-orange small,
+  .app-shell .mobile-dashboard .offer-market small {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--muted);
+    font-size: 9px;
+  }
+
+  .app-shell .mobile-dashboard .offer-market {
+    color: var(--ink);
+  }
+
+  .app-shell .mobile-nav button.active {
+    min-width: 58px;
+    border-radius: 11px;
+    background: #fff4ec;
+  }
+
+  .app-shell .mobile-nav .orange-qr-logo {
+    width: 25px;
+    height: 20px;
+  }
+
+  .app-shell .desktop-orange-money-page {
+    display: none;
+  }
+
+  .app-shell .mobile-orange-money-page {
+    display: block;
+  }
+
+  .app-shell .orange-money-topbar .menu-trigger {
+    display: grid !important;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+
+  .app-shell .orange-money-topbar .mobile-topbar-brand {
+    display: inline-flex !important;
+  }
+
+  .app-shell .orange-money-topbar .topbar-heading {
+    display: block !important;
+  }
+
+  .app-shell .orange-money-topbar .topbar-heading .eyebrow {
+    display: none;
+  }
+
+  .app-shell .orange-money-topbar .topbar-heading h1 {
+    margin: 0 0 0 12px;
+    font: 700 21px/1 "DM Sans", sans-serif;
+    letter-spacing: -0.045em;
+  }
+
+  .app-shell .orange-money-topbar .mobile-topbar-brand {
+    margin-right: 0;
+  }
+
+  .app-shell .orange-money-topbar .topbar-title {
+    gap: 0;
+  }
+
+  .app-shell .mobile-topbar-brand .orange-money-logo {
+    width: 40px;
+    height: 23px;
+    border-radius: 0;
+  }
+
+  .app-shell .mobile-topbar-brand .orange-money-logo {
+    background: transparent;
+  }
+
+  .app-shell .orange-money-shell .main-content {
+    padding: 10px 22px calc(78px + env(safe-area-inset-bottom));
+    background: #fff;
+  }
+
+  .app-shell .mobile-money-number-card {
+    display: grid;
+    grid-template-columns: 45px minmax(0, 1fr) 32px;
+    align-items: center;
+    gap: 11px;
+    min-height: 77px;
+    padding: 9px 12px;
+    border: 1px solid #ededed;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 1px 7px rgba(27, 38, 52, 0.05);
+  }
+
+  .app-shell .mobile-money-number-card .orange-money-logo {
+    width: 39px;
+    height: 39px;
+    border-radius: 7px;
+    background: #111;
+  }
+
+  .mobile-money-number-card div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-money-number-card div span {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .mobile-money-number-card div strong {
+    color: var(--ink);
+    font: 700 16px/1 "DM Sans", sans-serif;
+  }
+
+  .mobile-money-number-card > button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 38px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-balance-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(125px, 39%) minmax(0, 1fr);
+    gap: 18px;
+    min-height: 192px;
+    margin-top: 17px;
+    padding: 14px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #28282a 0%, #0d0d0e 100%);
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .app-shell .mobile-money-balance-card::after {
+    content: "";
+    position: absolute;
+    right: -36px;
+    bottom: -57px;
+    width: 126px;
+    height: 126px;
+    border: 4px solid #f56b2a;
+    border-radius: 50%;
+    box-shadow: 0 0 0 8px #111, 0 0 0 12px #09a96b, 0 0 0 16px #111, 0 0 0 20px #008fd3, 0 0 0 24px #111, 0 0 0 28px #7834aa;
+    opacity: 0.95;
+    pointer-events: none;
+  }
+
+  .app-shell .mobile-money-qr {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    max-width: 148px;
+    aspect-ratio: 1;
+    align-self: center;
+    padding: 9px;
+    border: 0;
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-qr::before,
+  .app-shell .mobile-money-qr::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    width: 7px;
+    height: 18px;
+    border-radius: 0 3px 3px 0;
+    pointer-events: none;
+  }
+
+  .app-shell .mobile-money-qr::before {
+    top: 29%;
+    right: -1px;
+    background: #09a96b;
+    box-shadow: 0 29px #f56b2a;
+  }
+
+  .app-shell .mobile-money-qr::after {
+    bottom: 29%;
+    left: -1px;
+    background: #f56b2a;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 -29px #09a96b;
+  }
+
+  .app-shell .mobile-money-qr .qr-graphic {
+    width: 100%;
+    height: 100%;
+    gap: 1px;
+  }
+
+  .app-shell .mobile-money-qr .qr-center-mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-shell .mobile-money-qr .orange-qr-logo {
+    width: 31px;
+    height: 23px;
+  }
+
+  .app-shell .mobile-money-balance-copy {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    align-self: center;
+  }
+
+  .app-shell .mobile-money-balance-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    color: #f5f4f3;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-money-balance-label .orange-qr-logo {
+    flex-shrink: 0;
+    transform: scale(0.8);
+  }
+
+  .app-shell .mobile-money-balance-menu {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-balance-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 26px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-money-balance-value small {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .app-shell .mobile-eye-button {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-transactions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 23px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--orange);
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-qr-caption {
+    position: absolute;
+    z-index: 3;
+    bottom: 9px;
+    left: 22px;
+    width: min(127px, 31%);
+    border-radius: 0 0 9px 9px;
+    background: #fff;
+    color: #111;
+    font-size: 10px;
+    padding: 3px 0;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .app-shell .mobile-money-section {
+    margin-top: 18px;
+  }
+
+  .app-shell .mobile-money-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .app-shell .mobile-money-section-heading h2 {
+    font-size: 21px;
+    letter-spacing: -0.045em;
+  }
+
+  .app-shell .mobile-money-section-heading button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--orange);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-favorites {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .app-shell .mobile-money-favorites button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 132px;
+    padding: 11px 3px 8px;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 1px 5px rgba(27, 38, 52, 0.04);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-favorite-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #242527;
+    color: #fff;
+  }
+
+  .app-shell .mobile-money-favorites button:nth-child(2) .mobile-money-favorite-icon {
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid #e7e7e7;
+  }
+
+  .app-shell .mobile-money-favorites button:nth-child(3) .mobile-money-favorite-icon,
+  .app-shell .mobile-money-favorites button:nth-child(4) .mobile-money-favorite-icon,
+  .app-shell .mobile-money-favorites button:nth-child(5) .mobile-money-favorite-icon {
+    background: #fff;
+    color: var(--orange);
+    border: 1px solid #e7e7e7;
+  }
+
+  .app-shell .mobile-money-favorites button > span:last-child {
+    max-width: 78px;
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  .app-shell .mobile-money-services-section {
+    margin-top: 17px;
+  }
+
+  .app-shell .mobile-money-services {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .app-shell .mobile-money-services button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 110px;
+    padding: 9px 3px;
+    border: 0;
+    border-radius: 13px;
+    background: #f8f8f8;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-service-icon {
+    display: grid;
+    place-items: center;
+    height: 42px;
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-money-services button > span:last-child {
+    font-size: 10px;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .app-shell .mobile-money-promo {
+    position: relative;
+    display: flex;
+    min-height: 143px;
+    margin-top: 18px;
+    padding: 20px 15px;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .app-shell .mobile-money-promo > div {
+    position: relative;
+    z-index: 3;
+  }
+
+  .app-shell .mobile-money-promo strong {
+    color: var(--orange);
+    font-size: 17px;
+  }
+
+  .app-shell .mobile-money-promo p {
+    margin-top: 8px;
+    color: var(--ink);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .app-shell .mobile-money-promo button {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .app-shell .mobile-money-promo-phone {
+    position: absolute;
+    z-index: 2;
+    right: 40px;
+    bottom: -27px;
+    display: block;
+    width: 67px;
+    height: 127px;
+    padding: 4px;
+    border: 3px solid #242424;
+    border-radius: 11px;
+    background: #191919;
+    transform: rotate(12deg);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, .18);
+  }
+
+  .app-shell .mobile-money-promo-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    padding-top: 5px;
+    border-radius: 7px;
+    background: #fff;
+  }
+
+  .app-shell .mobile-money-promo-screen .orange-money-logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background: #111;
+  }
+
+  .app-shell .mobile-money-promo-screen i {
+    display: block;
+    width: 50px;
+    height: 80px;
+    border-radius: 3px;
+    background: linear-gradient(160deg, #29292a 20%, #f56b2a 21% 29%, #fff 30% 43%, #28282a 44%);
+  }
+
+  .app-shell .mobile-money-promo-orb {
+    position: absolute;
+    z-index: 1;
+    border-radius: 50%;
+    background: var(--orange);
+    opacity: .95;
+  }
+
+  .app-shell .mobile-money-promo-orb.orb-one {
+    right: 64px;
+    bottom: -37px;
+    width: 73px;
+    height: 73px;
+  }
+
+  .app-shell .mobile-money-promo-orb.orb-two {
+    right: 12px;
+    bottom: 3px;
+    width: 22px;
+    height: 22px;
+    background: #f7bb28;
+  }
+
+  .app-shell .mobile-money-promo-coin {
+    position: absolute;
+    right: 9px;
+    bottom: 12px;
+    color: #f2aa1c;
+    font-size: 32px;
+  }
+
+  .app-shell .mobile-money-favorite-icon {
+    position: relative;
+  }
+
+  .app-shell .mobile-money-favorite-icon svg {
+    flex-shrink: 0;
+  }
+
+  .app-shell .favorite-withdraw-art,
+  .app-shell .favorite-purchases-art,
+  .app-shell .favorite-credit-art,
+  .app-shell .favorite-card-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .app-shell .favorite-withdraw-art svg:last-child {
+    position: absolute;
+    right: 6px;
+    bottom: 7px;
+    color: var(--orange);
+    background: #fff;
+    border-radius: 4px;
+  }
+
+  .app-shell .favorite-purchases-art svg:first-child {
+    position: absolute;
+    left: 9px;
+    top: 7px;
+  }
+
+  .app-shell .favorite-purchases-art svg:last-child {
+    position: absolute;
+    right: 6px;
+    bottom: 7px;
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-money-favorite-icon.favorite-credit {
+    background: #242527 !important;
+    color: #fff !important;
+  }
+
+  .app-shell .favorite-credit-art i {
+    position: absolute;
+    right: 9px;
+    bottom: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+  }
+
+  .app-shell .favorite-card-art {
+    width: 42px;
+    height: 28px;
+    border-radius: 4px;
+    background: #242527;
+    box-shadow: inset 0 -8px #f56b2a;
+  }
+
+  .app-shell .favorite-card-art span:first-child {
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    width: 12px;
+    height: 3px;
+    border-radius: 2px;
+    background: #f56b2a;
+  }
+
+  .app-shell .favorite-card-art span:last-child {
+    position: absolute;
+    right: 5px;
+    bottom: 4px;
+    width: 9px;
+    height: 3px;
+    border-radius: 2px;
+    background: #fff;
+  }
+}
+
+.mobile-orange-flow-page,
+.mobile-orange-services-page {
+  display: block;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 18px 0 42px;
+  font-family: "DM Sans", sans-serif;
+}
+
+@media (min-width: 761px) {
+  .mobile-orange-flow-page .mobile-flow-header,
+  .mobile-orange-services-page .mobile-flow-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 26px;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-header button,
+  .mobile-orange-services-page .mobile-flow-header button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-header .orange-qr-logo,
+  .mobile-orange-services-page .mobile-flow-header .orange-qr-logo {
+    width: 43px;
+    height: 22px;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-title,
+  .mobile-orange-services-page .mobile-flow-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-icon,
+  .mobile-orange-services-page .mobile-flow-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    border-radius: 18px;
+    background: #242527;
+    color: #fff;
+  }
+
+  .mobile-orange-flow-page .flow-icon-withdraw,
+  .mobile-orange-flow-page .flow-icon-purchases,
+  .mobile-orange-flow-page .flow-icon-card,
+  .mobile-orange-services-page .mobile-flow-icon {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .mobile-orange-flow-page .mobile-flow-title h1,
+  .mobile-orange-services-page .mobile-flow-title h1 {
+    font: 700 30px/1.05 "Space Grotesk", sans-serif;
+    letter-spacing: -.055em;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-title > div > span,
+  .mobile-orange-services-page .mobile-flow-title > div > span {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-title p,
+  .mobile-orange-services-page .mobile-flow-title p {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-balance,
+  .mobile-orange-services-page .mobile-flow-balance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+    margin-bottom: 16px;
+    padding: 0 17px;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-balance span,
+  .mobile-orange-services-page .mobile-flow-balance span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-balance strong,
+  .mobile-orange-services-page .mobile-flow-balance strong {
+    font-size: 14px;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-card {
+    padding: 24px;
+    border: 1px solid #eee;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(27, 38, 52, .04);
+  }
+
+  .mobile-orange-flow-page .mobile-flow-field {
+    display: block;
+    margin-top: 16px;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-field input,
+  .mobile-orange-flow-page .mobile-flow-field select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    margin-top: 7px;
+    padding: 0 12px;
+    border: 1px solid #dedfdd;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .mobile-orange-flow-page .mobile-flow-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 46px;
+    border-radius: 9px;
+    padding: 0 15px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .mobile-orange-flow-page .mobile-flow-submit {
+    width: 100%;
+    margin-top: 22px;
+  }
+
+  .mobile-orange-services-page .mobile-services-all-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .mobile-orange-services-page .mobile-services-all-grid button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 78px;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 13px;
+    background: #fff;
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .mobile-orange-services-page .mobile-services-all-grid button .mobile-money-service-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 10px;
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .mobile-orange-services-page .mobile-services-all-grid button strong {
+    font-size: 11px;
+  }
+
+  .mobile-orange-services-page .mobile-services-all-grid button > svg {
+    margin-left: auto;
+    color: var(--muted-light);
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell .mobile-orange-flow-page,
+  .app-shell .mobile-orange-services-page {
+    display: block;
+    min-height: calc(100vh - 70px);
+    padding: 0 0 88px;
+    font-family: "DM Sans", sans-serif;
+  }
+
+  .app-shell .mobile-flow-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 34px;
+    margin-bottom: 18px;
+  }
+
+  .app-shell .mobile-flow-header button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-flow-header .orange-qr-logo {
+    width: 43px;
+    height: 22px;
+  }
+
+  .app-shell .mobile-flow-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 6px 0 19px;
+  }
+
+  .app-shell .mobile-flow-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    border-radius: 18px;
+    background: #242527;
+    color: #fff;
+  }
+
+  .app-shell .mobile-flow-icon.flow-icon-withdraw,
+  .app-shell .mobile-flow-icon.flow-icon-purchases,
+  .app-shell .mobile-flow-icon.flow-icon-card {
+    background: #fff;
+    border: 1px solid #e9e7e3;
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-flow-icon.flow-icon-credit {
+    background: #242527;
+    color: #fff;
+  }
+
+  .app-shell .mobile-flow-icon .favorite-card-art {
+    transform: scale(1.1);
+  }
+
+  .app-shell .mobile-flow-title > div {
+    min-width: 0;
+  }
+
+  .app-shell .mobile-flow-title > div > span {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .app-shell .mobile-flow-title h1 {
+    color: var(--ink);
+    font: 700 27px/1.08 "Space Grotesk", sans-serif;
+    letter-spacing: -.055em;
+  }
+
+  .app-shell .mobile-flow-title p {
+    max-width: 280px;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .app-shell .mobile-flow-balance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 54px;
+    margin-bottom: 14px;
+    padding: 0 15px;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(27, 38, 52, .04);
+  }
+
+  .app-shell .mobile-flow-balance span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .app-shell .mobile-flow-balance .orange-qr-logo {
+    width: 26px;
+    height: 18px;
+  }
+
+  .app-shell .mobile-flow-balance strong {
+    color: var(--ink);
+    font: 700 14px "DM Sans", sans-serif;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-flow-balance small {
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 500;
+  }
+
+  .app-shell .mobile-flow-card {
+    padding: 18px 15px;
+    border: 1px solid #eee;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(27, 38, 52, .04);
+  }
+
+  .app-shell .mobile-flow-card-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .app-shell .mobile-flow-card-heading span {
+    color: var(--ink);
+    font: 700 17px "Space Grotesk", sans-serif;
+    letter-spacing: -.04em;
+  }
+
+  .app-shell .mobile-flow-card-heading strong {
+    color: var(--muted-light);
+    font: 600 10px "DM Sans", sans-serif;
+    white-space: nowrap;
+  }
+
+  .app-shell .mobile-flow-field {
+    display: block;
+    margin-top: 14px;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-flow-field em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .app-shell .mobile-flow-field > small {
+    margin-left: 4px;
+    color: var(--muted-light);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .app-shell .mobile-flow-field input,
+  .app-shell .mobile-flow-field select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    margin-top: 7px;
+    padding: 0 12px;
+    border: 1px solid #dedfdd;
+    border-radius: 9px;
+    outline: 0;
+    background: #fff;
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  .app-shell .mobile-flow-field input:focus,
+  .app-shell .mobile-flow-field select:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(245, 107, 42, .12);
+  }
+
+  .app-shell .mobile-flow-input-suffix,
+  .app-shell .mobile-flow-input-prefix {
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    margin-top: 7px;
+    border: 1px solid #dedfdd;
+    border-radius: 9px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .app-shell .mobile-flow-input-suffix:focus-within,
+  .app-shell .mobile-flow-input-prefix:focus-within {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(245, 107, 42, .12);
+  }
+
+  .app-shell .mobile-flow-input-suffix input,
+  .app-shell .mobile-flow-input-prefix input {
+    min-height: 44px;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .app-shell .mobile-flow-input-suffix span,
+  .app-shell .mobile-flow-input-prefix span {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-flow-input-suffix span {
+    padding-right: 12px;
+  }
+
+  .app-shell .mobile-flow-input-prefix span {
+    padding-left: 12px;
+  }
+
+  .app-shell .mobile-flow-input-suffix input {
+    width: 100%;
+  }
+
+  .app-shell .mobile-flow-input-prefix input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .app-shell .mobile-flow-error {
+    margin-top: 12px;
+    color: var(--danger);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .app-shell .mobile-flow-primary,
+  .app-shell .mobile-flow-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 46px;
+    border-radius: 9px;
+    padding: 0 14px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .app-shell .mobile-flow-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+
+  .app-shell .mobile-flow-primary:active {
+    background: var(--orange-dark);
+  }
+
+  .app-shell .mobile-flow-secondary {
+    border: 1px solid #dedfdd;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .app-shell .mobile-flow-submit {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .app-shell .mobile-flow-secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 15px;
+    color: var(--muted);
+    font-size: 9px;
+  }
+
+  .app-shell .mobile-flow-secure svg {
+    color: var(--green);
+  }
+
+  .app-shell .mobile-flow-summary {
+    border-top: 1px solid #eee;
+  }
+
+  .app-shell .mobile-flow-summary > div {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .app-shell .mobile-flow-summary span {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .app-shell .mobile-flow-summary strong {
+    max-width: 60%;
+    color: var(--ink);
+    font-size: 11px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .app-shell .mobile-flow-actions {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .app-shell .mobile-flow-actions .mobile-flow-primary {
+    min-width: 0;
+  }
+
+  .app-shell .mobile-flow-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 18px 22px;
+    border: 1px solid #eee;
+    border-radius: 17px;
+    background: #fff;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(27, 38, 52, .04);
+  }
+
+  .app-shell .mobile-flow-success-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 15px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    color: var(--green);
+  }
+
+  .app-shell .mobile-flow-success h2 {
+    margin-top: 7px;
+    font-size: 23px;
+  }
+
+  .app-shell .mobile-flow-success > p {
+    max-width: 270px;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .app-shell .mobile-flow-success-detail {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 8px;
+    margin: 22px 0;
+  }
+
+  .app-shell .mobile-flow-success-detail span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 7px;
+    border-radius: 8px;
+    background: #f8f8f8;
+  }
+
+  .app-shell .mobile-flow-success-detail small {
+    color: var(--muted-light);
+    font-size: 9px;
+  }
+
+  .app-shell .mobile-flow-success-detail strong {
+    color: var(--ink);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .app-shell .mobile-flow-success > .mobile-flow-primary {
+    width: 100%;
+  }
+
+  .app-shell .mobile-orange-services-page .services-title {
+    margin-bottom: 16px;
+  }
+
+  .app-shell .mobile-orange-services-page .services-title .mobile-flow-icon {
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-services-all-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .app-shell .mobile-services-all-grid button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 74px;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 1px solid #eee;
+    border-radius: 13px;
+    background: #fff;
+    color: var(--ink);
+    text-align: left;
+    box-shadow: 0 1px 5px rgba(27, 38, 52, .04);
+  }
+
+  .app-shell .mobile-services-all-grid button .mobile-money-service-icon {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    flex: 0 0 35px;
+    border-radius: 10px;
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .app-shell .mobile-services-all-grid button strong {
+    max-width: 80px;
+    font: 700 11px/1.2 "DM Sans", sans-serif;
+  }
+
+  .app-shell .mobile-services-all-grid button > svg {
+    margin-left: auto;
+    color: var(--muted-light);
+  }
+}
+
+.mobile-orange-card-page,
+.mobile-orange-receipt-page {
+  display: block;
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: 18px 0 42px;
+  font-family: "DM Sans", sans-serif;
+}
+
+.mobile-orange-card-page .mobile-flow-header,
+.mobile-orange-receipt-page .mobile-flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  margin-bottom: 21px;
+}
+
+.mobile-orange-card-page .mobile-flow-header button,
+.mobile-orange-receipt-page .mobile-flow-header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mobile-orange-card-page .mobile-flow-header .orange-qr-logo,
+.mobile-orange-receipt-page .mobile-flow-header .orange-qr-logo {
+  width: 43px;
+  height: 22px;
+}
+
+.mobile-card-page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.mobile-card-page-title > div > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.mobile-card-page-title h1 {
+  font: 700 29px/1.05 "Space Grotesk", sans-serif;
+  letter-spacing: -.055em;
+}
+
+.mobile-card-page-title > svg {
+  color: var(--ink);
+}
+
+.prepaid-card-visual {
+  position: relative;
+  width: min(100%, 700px);
+  min-height: 350px;
+  margin: 0 auto;
+  padding: 25px 28px 22px;
+  border-radius: 22px;
+  background: linear-gradient(140deg, #272727 0%, #0b0b0c 62%, #191919 100%);
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .13);
+}
+
+.prepaid-card-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 20%, rgba(255,255,255,.025) 21%, transparent 22%, transparent 45%, rgba(255,255,255,.02) 46%, transparent 47%);
+  opacity: .8;
+}
+
+.prepaid-card-top,
+.prepaid-card-balance,
+.prepaid-card-bottom {
+  position: relative;
+  z-index: 2;
+}
+
+.prepaid-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prepaid-card-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 22px;
+}
+
+.prepaid-card-brand .orange-qr-logo {
+  width: 39px;
+  height: 27px;
+  object-fit: contain;
+}
+
+.prepaid-card-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.prepaid-card-access span {
+  font-size: 29px;
+  line-height: .7;
+}
+
+.prepaid-card-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.prepaid-card-balance span {
+  font-size: 17px;
+}
+
+.prepaid-card-balance strong {
+  font: 700 19px "DM Sans", sans-serif;
+  letter-spacing: .07em;
+}
+
+.prepaid-card-balance small {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.prepaid-card-eye {
+  position: absolute;
+  z-index: 4;
+  top: 88px;
+  left: 26px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+}
+
+.prepaid-card-rainbow {
+  position: absolute;
+  z-index: 1;
+  right: 145px;
+  top: -118px;
+  width: 385px;
+  height: 395px;
+  border: 5px solid var(--orange);
+  border-left-color: transparent;
+  border-radius: 0 0 155px 0;
+  transform: rotate(1deg);
+  box-shadow: 10px 0 0 -5px #111, 15px 0 0 0 #f7a400, 20px 0 0 -5px #111, 25px 0 0 0 #12ae72;
+  opacity: .95;
+}
+
+.prepaid-card-bottom {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  gap: 15px;
+  margin-top: 111px;
+  font-size: 20px;
+  letter-spacing: .15em;
+}
+
+.prepaid-card-bottom span:nth-child(5) {
+  grid-column: span 2;
+  font-size: 16px;
+  letter-spacing: .16em;
+}
+
+.prepaid-card-bottom span:nth-child(6) {
+  font-size: 16px;
+  letter-spacing: .06em;
+}
+
+.mastercard-circles {
+  display: flex;
+  justify-self: end;
+  gap: 0;
+  width: 55px;
+  height: 30px;
+  letter-spacing: 0;
+}
+
+.mastercard-circles i {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f04427;
+}
+
+.mastercard-circles i + i {
+  margin-left: -8px;
+  background: #f6a51b;
+  opacity: .95;
+}
+
+.prepaid-card-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0 31px;
+}
+
+.prepaid-card-actions button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-height: 112px;
+  padding: 12px 7px 8px;
+  border: 1px solid #eee;
+  border-radius: 15px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: 0 1px 5px rgba(27, 38, 52, .04);
+}
+
+.prepaid-action-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 17px;
+  background: #242527;
+  color: #fff;
+}
+
+.prepaid-action-icon.transfer-art {
+  color: var(--orange);
+}
+
+.prepaid-action-icon.recharge-art,
+.prepaid-action-icon.settings-art {
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  color: var(--orange);
+}
+
+.plus-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.card-transactions-section {
+  margin-top: 0;
+}
+
+.mobile-card-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.mobile-card-section-heading h2 {
+  font: 700 21px "Space Grotesk", sans-serif;
+  letter-spacing: -.045em;
+}
+
+.mobile-card-section-heading button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-transaction-list {
+  overflow: hidden;
+  border: 1px solid #eee;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.card-transaction-list button {
+  display: grid;
+  grid-template-columns: 43px minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+
+.card-transaction-list button:last-child {
+  border-bottom: 0;
+}
+
+.card-transaction-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.card-transaction-list button > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.card-transaction-list strong {
+  font: 700 12px "DM Sans", sans-serif;
+}
+
+.card-transaction-list small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.card-transaction-list b {
+  color: var(--green);
+  font: 700 12px "DM Sans", sans-serif;
+  white-space: nowrap;
+}
+
+.card-transaction-list > button > svg {
+  color: var(--muted-light);
+}
+
+.card-security-note {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  margin-top: 24px;
+  padding: 17px 15px;
+  border-radius: 15px;
+  background: var(--orange-soft);
+  color: var(--ink);
+  text-align: left;
+}
+
+.card-security-note > span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 2px solid var(--orange);
+  border-radius: 12px;
+  color: var(--orange);
+}
+
+.card-security-note div {
+  flex: 1;
+}
+
+.card-security-note strong {
+  display: block;
+  font-size: 12px;
+}
+
+.card-security-note p {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.card-security-note > svg {
+  color: var(--orange);
+}
+
+.mobile-orange-receipt-page {
+  max-width: 700px;
+  background: #fff;
+  color: #111;
+}
+
+.mobile-orange-receipt-page .mobile-flow-header {
+  margin-bottom: 19px;
+}
+
+.receipt-download {
+  display: grid;
+  place-items: center;
+  color: var(--orange);
+}
+
+.receipt-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #111;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.receipt-brand .orange-qr-logo {
+  width: 39px;
+  height: 25px;
+}
+
+.receipt-heading {
+  margin-top: 27px;
+}
+
+.receipt-heading h1 {
+  font: 700 26px/1 "Space Grotesk", sans-serif;
+  letter-spacing: -.04em;
+}
+
+.receipt-heading p {
+  margin-top: 3px;
+  color: #555;
+  font-size: 11px;
+}
+
+.receipt-rule {
+  height: 1px;
+  margin: 16px 0 14px;
+  background: #ddd;
+}
+
+.receipt-section {
+  padding: 0 0 13px;
+  border-bottom: 1px solid #ddd;
+}
+
+.receipt-section + .receipt-section {
+  padding-top: 14px;
+}
+
+.receipt-section h2 {
+  margin-bottom: 7px;
+  font: 700 13px "DM Sans", sans-serif;
+}
+
+.receipt-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 22px;
+  font-size: 11px;
+}
+
+.receipt-row > span {
+  color: #555;
+}
+
+.receipt-row strong {
+  max-width: 67%;
+  font: 600 11px "DM Sans", sans-serif;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.receipt-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--green);
+}
+
+.receipt-done {
+  width: 100%;
+  margin-top: 22px;
+}
+
+@media (max-width: 760px) {
+  .app-shell .mobile-orange-card-page,
+  .app-shell .mobile-orange-receipt-page {
+    width: 100%;
+    padding: 0 0 88px;
+  }
+
+  .app-shell .prepaid-card-visual {
+    min-height: 275px;
+    padding: 19px 17px 16px;
+    border-radius: 17px;
+  }
+
+  .app-shell .prepaid-card-brand {
+    gap: 6px;
+    font-size: 16px;
+  }
+
+  .app-shell .prepaid-card-brand .orange-qr-logo {
+    width: 32px;
+    height: 23px;
+  }
+
+  .app-shell .prepaid-card-access {
+    gap: 4px;
+    font-size: 14px;
+  }
+
+  .app-shell .prepaid-card-access span {
+    font-size: 21px;
+  }
+
+  .app-shell .prepaid-card-balance {
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .app-shell .prepaid-card-balance span {
+    font-size: 13px;
+  }
+
+  .app-shell .prepaid-card-balance strong {
+    font-size: 15px;
+  }
+
+  .app-shell .prepaid-card-balance small {
+    font-size: 11px;
+  }
+
+  .app-shell .prepaid-card-eye {
+    top: 72px;
+    left: 15px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-shell .prepaid-card-rainbow {
+    right: 46px;
+    top: -96px;
+    width: 275px;
+    height: 305px;
+    border-width: 4px;
+    border-radius: 0 0 115px 0;
+    box-shadow: 8px 0 0 -4px #111, 12px 0 0 0 #f7a400, 16px 0 0 -4px #111, 20px 0 0 0 #12ae72;
+  }
+
+  .app-shell .prepaid-card-bottom {
+    gap: 7px;
+    margin-top: 85px;
+    font-size: 15px;
+  }
+
+  .app-shell .prepaid-card-bottom span:nth-child(5),
+  .app-shell .prepaid-card-bottom span:nth-child(6) {
+    font-size: 12px;
+  }
+
+  .app-shell .mastercard-circles {
+    width: 42px;
+    height: 23px;
+  }
+
+  .app-shell .mastercard-circles i {
+    width: 23px;
+    height: 23px;
+  }
+
+  .app-shell .prepaid-card-actions {
+    gap: 7px;
+    margin: 18px 0 28px;
+  }
+
+  .app-shell .prepaid-card-actions button {
+    min-height: 111px;
+    padding: 10px 3px 7px;
+    font-size: 9px;
+  }
+
+  .app-shell .prepaid-action-icon {
+    width: 49px;
+    height: 49px;
+    border-radius: 15px;
+  }
+
+  .app-shell .mobile-card-section-heading h2 {
+    font-size: 21px;
+  }
+
+  .app-shell .card-transaction-list button {
+    grid-template-columns: 36px minmax(0, 1fr) auto 16px;
+    gap: 7px;
+    min-height: 72px;
+    padding: 9px 10px;
+  }
+
+  .app-shell .card-transaction-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .app-shell .card-transaction-list strong,
+  .app-shell .card-transaction-list b {
+    font-size: 10px;
+  }
+
+  .app-shell .card-transaction-list small {
+    font-size: 9px;
+  }
+
+  .app-shell .card-security-note {
+    margin-top: 20px;
+  }
+
+  .app-shell .mobile-orange-receipt-page {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-shell .mobile-money-favorites {
+    gap: 4px;
+  }
+
+  .app-shell .mobile-money-favorites button {
+    min-height: 116px;
+    padding-inline: 1px;
+  }
+
+  .app-shell .mobile-money-favorite-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .app-shell .mobile-money-favorites button > span:last-child {
+    font-size: 8px;
+  }
+
+  .app-shell .mobile-money-services {
+    gap: 4px;
+  }
+
+  .app-shell .mobile-money-services button {
+    min-height: 100px;
+    padding-inline: 1px;
+  }
+
+  .app-shell .mobile-money-service-icon {
+    transform: scale(.88);
+  }
+
+  .app-shell .mobile-money-services button > span:last-child {
+    font-size: 8px;
+  }
+
+  .app-shell .mobile-flow-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell .mobile-flow-actions button {
+    width: 100%;
+  }
+
+  .app-shell .prepaid-card-actions {
+    gap: 4px;
+  }
+
+  .app-shell .prepaid-card-actions button {
+    font-size: 8px;
+  }
+}

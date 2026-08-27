@@ -1,1 +1,3 @@
 - [Stylesheet import order](stylesheet-import-order.md) — preserve top-level CSS imports before appended rules to keep Vite/PostCSS warning-free.
+- [GitHub sync connector](github-sync-connector.md) — tree/commit calls can fail after blobs upload; verify refs and prefer isolated contents writes.
+- [Netlify static API boundary](netlify-static-api-boundary.md) — keep API failures separate from the SPA fallback when publishing the Vite frontend without the Node server.

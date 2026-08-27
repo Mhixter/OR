@@ -2206,11 +2206,34 @@
   margin-top: 22px;
 }
 
+.receipt-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.receipt-actions .mobile-flow-secondary,
+.receipt-actions .receipt-done {
+  flex: 1;
+  margin-top: 0;
+}
+
+.receipt-download {
+  border: 0;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+}
+
 @media (max-width: 760px) {
   .app-shell .mobile-orange-card-page,
   .app-shell .mobile-orange-receipt-page {
     width: 100%;
     padding: 0 0 88px;
+  }
+
+  .receipt-actions {
+    flex-direction: column;
   }
 
   .app-shell .prepaid-card-visual {

@@ -709,44 +709,8 @@ function OrangeMoneyServiceDetailView({ serviceId, goTo, showToast }) {
   </div>;
 }
 
-function MobileOrangeMoneyPage({ goTo, showToast }) {
-  const [balanceVisible, setBalanceVisible] = useState(false);
-  const favoriteItems = [
-    { label: "Send money", visual: "send", action: () => goTo("orange-send-money") },
-    { label: "Withdraw money", visual: "withdraw", action: () => goTo("orange-withdraw-money") },
-    { label: "Pay for purchases", visual: "purchases", action: () => goTo("orange-pay-purchases") },
-    { label: "Buy credit", visual: "credit", action: () => goTo("orange-buy-credit") },
-    { label: "Virtual card", visual: "card", action: () => goTo("orange-virtual-card") },
-  ];
-  return <div className="mobile-orange-money-page">
-    <section className="mobile-money-number-card">
-      <OrangeLogo />
-      <div><span>My number</span><strong>237696015584</strong></div>
-      <button onClick={() => showToast("Phone number copied to clipboard")} aria-label="Copy phone number"><Copy size={18} /></button>
-    </section>
-    <section className="mobile-money-balance-card">
-      <button className="mobile-money-qr" onClick={() => goTo("qr")} aria-label="Open merchant QR"><QrGraphic /><span className="qr-center-mark orange-qr-center"><OrangeQrLogo /></span></button>
-      <div className="mobile-money-balance-copy">
-        <span className="mobile-money-balance-label"><OrangeQrLogo /> Primary balance <button className="mobile-money-balance-menu" onClick={() => showToast("Balance accounts opened in demo mode")} aria-label="Open balance accounts"><ChevronDown size={18} /></button></span>
-        <span className="mobile-money-balance-value"><button className="mobile-eye-button" onClick={() => setBalanceVisible((visible) => !visible)} aria-label={balanceVisible ? "Hide balance" : "Show balance"}><Eye size={21} /></button>{balanceVisible ? "286,450" : "******"} <small>FCFA</small></span>
-        <button className="mobile-money-transactions" onClick={() => goTo("activity")}>My transactions <ChevronRight size={18} /></button>
-      </div>
-      <span className="mobile-money-qr-caption">Scan and pay</span>
-    </section>
-    <section className="mobile-money-section">
-      <div className="mobile-money-section-heading"><h2>My favorites</h2><button onClick={() => showToast("Favorite shortcuts customization opened in demo mode")}>Customize <Pencil size={14} /></button></div>
-      <div className="mobile-money-favorites">{favoriteItems.map(({ label, visual, action, message }) => <button key={label} onClick={() => action ? action() : showToast(message)}><span className={`mobile-money-favorite-icon favorite-${visual}`}><MobileMoneyFavoriteArt type={visual} /></span><span>{label}</span></button>)}</div>
-    </section>
-    <section className="mobile-money-section mobile-money-services-section">
-      <div className="mobile-money-section-heading"><h2>Services</h2><button onClick={() => goTo("services")}>View all <ChevronRight size={17} /></button></div>
-      <div className="mobile-money-services">{orangeServices.slice(0, 5).map(({ label, icon: Icon, route, message }) => <button key={label} onClick={() => route ? goTo(route) : showToast(message)}><span className={`mobile-money-service-icon service-${label.toLowerCase().replace(" ", "-")}`}><Icon size={26} /></span><span>{label}</span></button>)}</div>
-    </section>
-    <section className="mobile-money-promo">
-      <div><strong>More than a wallet</strong><p>Pay, save, borrow<br />and much more.</p><button onClick={() => showToast("Orange Money discovery opened in demo mode")}>Discover Orange Money</button></div>
-      <span className="mobile-money-promo-phone"><span className="mobile-money-promo-screen"><OrangeLogo /><i /></span></span>
-      <span className="mobile-money-promo-orb orb-one" /><span className="mobile-money-promo-orb orb-two" /><span className="mobile-money-promo-coin">●</span>
-    </section>
-  </div>;
+function MobileOrangeMoneyPage({ goTo }) {
+  return <div className="mobile-orange-money-page"><div className="panel empty-state unavailable-state"><span className="empty-icon"><CircleHelp size={22} /></span><span className="eyebrow">Live connection required</span><h3>Orange Money wallet is unavailable</h3><p>Connect a live Orange Money account to view balances and wallet actions.</p><button className="primary-button" onClick={() => goTo("collections")}>Open demo deposit <ArrowRight size={15} /></button></div></div>;
 }
 
 function OrangeLogo() {

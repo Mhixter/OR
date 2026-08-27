@@ -1,0 +1,1 @@
+- [Stylesheet import order](stylesheet-import-order.md) — preserve top-level CSS imports before appended rules to keep Vite/PostCSS warning-free.

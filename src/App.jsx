@@ -6,7 +6,7 @@ import {
   Pencil, ScanLine, Search, Send, Settings2, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Store, UserRound,
   UsersRound, WalletCards, WalletMinimal, X, Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import orangeLogoAsset from "../attached_assets/image_1787793543086.png";
 
 const navItems = [
@@ -21,20 +21,35 @@ const navItems = [
 ];
 
 const transactions = [
-  { id: "TX-845210", name: "Binta Traoré", type: "Payment received", amount: "+ 18,500", time: "Today, 10:42", status: "Completed", tone: "success", icon: ArrowDownLeft },
-  { id: "TX-845197", name: "Issouf Kaboré", type: "Payment received", amount: "+ 7,250", time: "Today, 09:18", status: "Completed", tone: "success", icon: ArrowDownLeft },
-  { id: "TR-110482", name: "Airtel distribution", type: "Transfer sent", amount: "− 25,000", time: "Yesterday, 17:31", status: "Completed", tone: "neutral", icon: ArrowUpRight },
-  { id: "TX-845101", name: "Mariam Ouédraogo", type: "Payment received", amount: "+ 42,000", time: "Yesterday, 16:08", status: "Pending", tone: "warning", icon: ArrowDownLeft },
+  { id: "TX-845210", name: "Binta Traoré", type: "Payment received", amount: "+ 18,500", time: "Today, 10:42", date: "24 April 2024 · 10:42", status: "Completed", tone: "success", channel: "Checkout", reference: "OM-PAY-845210", icon: ArrowDownLeft },
+  { id: "TX-845197", name: "Issouf Kaboré", type: "Payment received", amount: "+ 7,250", time: "Today, 09:18", date: "24 April 2024 · 09:18", status: "Completed", tone: "success", channel: "Checkout", reference: "OM-PAY-845197", icon: ArrowDownLeft },
+  { id: "TR-110482", name: "Airtel distribution", type: "Transfer sent", amount: "− 25,000", time: "Yesterday, 17:31", date: "23 April 2024 · 17:31", status: "Completed", tone: "neutral", channel: "Merchant transfer", reference: "OM-TRF-110482", icon: ArrowUpRight },
+  { id: "TX-845101", name: "Mariam Ouédraogo", type: "Payment received", amount: "+ 42,000", time: "Yesterday, 16:08", date: "23 April 2024 · 16:08", status: "Pending", tone: "warning", channel: "QR payment", reference: "OM-PAY-845101", icon: ArrowDownLeft },
 ];
+
+const cardReceiptTransaction = {
+  id: "CI250616.1217.B95780",
+  name: "Orange Money cash in",
+  type: "Cash in",
+  amount: "+ 1,000",
+  time: "16 June 2025, 12:17",
+  date: "16 June 2025 · 12:17",
+  status: "Success",
+  tone: "success",
+  channel: "Retailer",
+  reference: "CI250616.1217.B95780",
+  details: { "Agent code": "219492", "Retailer phone": "74 741337", "Customer phone": "78 973040" },
+  icon: ArrowDownLeft,
+};
 
 const activityEvents = [
   { date: "Today", items: [
-    { title: "Payment received", detail: "Binta Traoré · Checkout", amount: "+ 18,500 FCFA", time: "10:42", icon: ArrowDownLeft, tone: "success" },
+    { title: "Payment received", detail: "Binta Traoré · Checkout", amount: "+ 18,500 FCFA", time: "10:42", icon: ArrowDownLeft, tone: "success", transactionId: "TX-845210" },
     { title: "Cash register opened", detail: "Opening balance · Main counter", amount: "50,000 FCFA", time: "08:01", icon: WalletMinimal, tone: "orange" },
   ]},
   { date: "Yesterday", items: [
-    { title: "Transfer sent", detail: "Airtel distribution · Main account", amount: "− 25,000 FCFA", time: "17:31", icon: ArrowUpRight, tone: "neutral" },
-    { title: "Payment received", detail: "Mariam Ouédraogo · QR payment", amount: "+ 42,000 FCFA", time: "16:08", icon: QrCode, tone: "success" },
+    { title: "Transfer sent", detail: "Airtel distribution · Main account", amount: "− 25,000 FCFA", time: "17:31", icon: ArrowUpRight, tone: "neutral", transactionId: "TR-110482" },
+    { title: "Payment received", detail: "Mariam Ouédraogo · QR payment", amount: "+ 42,000 FCFA", time: "16:08", icon: QrCode, tone: "success", transactionId: "TX-845101" },
     { title: "Signed in", detail: "Android device · Ouagadougou", amount: "", time: "07:55", icon: ShieldCheck, tone: "blue" },
   ]},
 ];
@@ -43,25 +58,123 @@ const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(Number(val
 const normalizePhone = (value) => String(value || "").replace(/\D/g, "");
 const isValidAmount = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
 const isValidPhone = (value) => /^\d{8}$/.test(normalizePhone(value));
+const DEMO_PIN = "1234";
+
+const toPdfText = (value) => String(value ?? "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^\x20-\x7E]/g, "-");
+
+const escapePdfText = (value) => toPdfText(value).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+
+const downloadTransactionPdf = (transaction) => {
+  const lines = [
+    "ORANGE MONEY PAY - MERCHANT RECEIPT",
+    "Sahel Market",
+    "",
+    `Transaction: ${transaction.id}`,
+    `Type: ${transaction.type}`,
+    `Amount: ${transaction.amount} FCFA`,
+    `Status: ${transaction.status}`,
+    `Date: ${transaction.date || transaction.time}`,
+    `Reference: ${transaction.reference || transaction.id}`,
+    `Channel: ${transaction.channel || "Merchant workspace"}`,
+    `Counterparty: ${transaction.name}`,
+    ...Object.entries(transaction.details || {}).map(([label, value]) => `${label}: ${value}`),
+    "",
+    "Demo receipt - no real funds were moved.",
+  ];
+  const content = [
+    "BT",
+    "/F1 12 Tf",
+    "50 760 Td",
+    ...lines.flatMap((line, index) => [`(${escapePdfText(line)}) Tj`, index < lines.length - 1 ? "0 -20 Td" : ""]),
+    "ET",
+  ].filter(Boolean).join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+  ];
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets[index + 1] = pdf.length;
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => { pdf += `${String(offset).padStart(10, "0")} 00000 n \n`; });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  const url = URL.createObjectURL(new Blob([pdf], { type: "application/pdf" }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${toPdfText(transaction.reference || transaction.id)}-receipt.pdf`;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+const persistEvent = async ({ eventType, viewId, payload = {} }) => {
+  const response = await fetch("/api/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ eventType, viewId, payload }),
+  });
+  if (!response.ok) throw new Error(`Event save failed with status ${response.status}`);
+  return response.json();
+};
+
+const persistSetting = async (key, value) => {
+  const response = await fetch("/api/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key, value }),
+  });
+  if (!response.ok) throw new Error(`Setting save failed with status ${response.status}`);
+  return response.json();
+};
 
 function App() {
   const [activeView, setActiveView] = useState("dashboard");
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [pinModal, setPinModal] = useState(null);
 
-  const showToast = (message) => {
+  const record = (eventType, viewId, payload) => {
+    persistEvent({ eventType, viewId, payload }).catch((error) => console.error(error));
+  };
+  const showToast = (message, event = {}) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2800);
+    record(event.type || "ui_action", activeView, { message, ...(event.payload || {}) });
   };
   const goTo = (view) => {
+    record("navigation", view, { from: activeView });
     setActiveView(view);
     setMobileMenuOpen(false);
     setProfileOpen(false);
     setNotificationsOpen(false);
   };
+  const openTransaction = (transaction) => {
+    setSelectedTransaction({ ...transaction, origin: activeView });
+    goTo("transaction-detail");
+  };
+  const openSecurity = () => setPinModal("confirm");
+  const lockApp = () => {
+    setPinModal(null);
+    setIsLocked(true);
+  };
   const isOrangeExperience = activeView === "orange-money" || activeView === "services" || activeView.startsWith("orange-");
+
+  if (isLocked) {
+    return <LockScreen onUnlock={() => { setIsLocked(false); setToast("App unlocked in demo mode"); }} />;
+  }
 
   return (
     <div className="app-shell">
@@ -71,11 +184,12 @@ function App() {
           profileOpen={profileOpen} setProfileOpen={setProfileOpen}
           notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} goTo={goTo} showToast={showToast} />
         <div className="main-content">
-          <ViewRenderer activeView={activeView} goTo={goTo} showToast={showToast} />
+          <ViewRenderer activeView={activeView} goTo={goTo} showToast={showToast} openTransaction={openTransaction} selectedTransaction={selectedTransaction} onSecurity={openSecurity} onLock={lockApp} />
         </div>
       </main>
       <MobileNav activeView={activeView} goTo={goTo} />
       {toast && <div className="toast"><Check size={16} /> {toast}</div>}
+      {pinModal && <PinDialog mode={pinModal} onClose={() => setPinModal(null)} onSuccess={() => { setPinModal(null); showToast("PIN confirmed in demo mode"); }} onLock={lockApp} />}
     </div>
   );
 }
@@ -160,7 +274,7 @@ function MobileNav({ activeView, goTo }) {
   return <nav className="mobile-nav mobile-only" aria-label="Mobile navigation">{items.map((item) => { const Icon = item.icon; const itemActive = item.id === "orange-money" ? orangeMoneyActive : activeView === item.id; return <button key={item.id} className={itemActive ? "active" : ""} onClick={() => goTo(item.id)} aria-label={item.label}>{item.logo ? <OrangeQrLogo /> : <Icon size={20} />}<span>{item.label}</span></button>; })}</nav>;
 }
 
-function ViewRenderer({ activeView, goTo, showToast }) {
+function ViewRenderer({ activeView, goTo, showToast, openTransaction, selectedTransaction, onSecurity, onLock }) {
   if (orangeServiceConfigs[activeView]) return <OrangeMoneyServiceDetailView serviceId={activeView} goTo={goTo} showToast={showToast} />;
   switch (activeView) {
     case "orange-money": return <OrangeMoneyView goTo={goTo} showToast={showToast} />;
@@ -170,17 +284,18 @@ function ViewRenderer({ activeView, goTo, showToast }) {
     case "orange-buy-credit":
     case "orange-virtual-card":
       return <OrangeMoneyFlowView flowId={activeView} goTo={goTo} showToast={showToast} />;
-    case "orange-card-receipt": return <OrangeMoneyReceiptView goTo={goTo} />;
+    case "orange-card-receipt": return <OrangeMoneyReceiptView goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
     case "services": return <OrangeMoneyServicesView goTo={goTo} showToast={showToast} />;
-    case "collections": return <CollectionsView showToast={showToast} />;
-    case "transfers": return <TransfersView showToast={showToast} />;
+    case "collections": return <CollectionsView showToast={showToast} openTransaction={openTransaction} />;
+    case "transfers": return <TransfersView showToast={showToast} openTransaction={openTransaction} />;
     case "qr": return <QrView showToast={showToast} />;
     case "register": return <RegisterView showToast={showToast} />;
     case "revenue": return <RevenueView showToast={showToast} />;
-    case "activity": return <ActivityView showToast={showToast} />;
+    case "activity": return <ActivityView showToast={showToast} openTransaction={openTransaction} />;
     case "verify": return <VerifyView showToast={showToast} />;
-    case "profile": return <ProfileView showToast={showToast} />;
-    default: return <Dashboard goTo={goTo} showToast={showToast} />;
+    case "profile": return <ProfileView showToast={showToast} onSecurity={onSecurity} onLock={onLock} />;
+    case "transaction-detail": return <TransactionDetailView transaction={selectedTransaction} goTo={goTo} showToast={showToast} />;
+    default: return <Dashboard goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
   }
 }
 
@@ -188,8 +303,107 @@ function PageIntro({ eyebrow, title, description, action }) {
   return <div className="page-intro"><div><span className="eyebrow">{eyebrow}</span><h2>{title}</h2><p>{description}</p></div>{action}</div>;
 }
 
-function Dashboard({ goTo, showToast }) {
+function LoadingSkeleton({ className = "" }) {
+  return <span className={`skeleton-block ${className}`} aria-hidden="true" />;
+}
+
+function DashboardSkeleton() {
+  return <div className="dashboard-view loading-view" role="status" aria-label="Loading dashboard">
+    <section className="welcome-row"><div><LoadingSkeleton className="skeleton-eyebrow" /><LoadingSkeleton className="skeleton-title" /><LoadingSkeleton className="skeleton-copy" /></div><LoadingSkeleton className="skeleton-button" /></section>
+    <section className="dashboard-grid"><LoadingSkeleton className="skeleton-card" /><LoadingSkeleton className="skeleton-card" /></section>
+    <section className="stats-row"><LoadingSkeleton className="skeleton-stat" /><LoadingSkeleton className="skeleton-stat" /><LoadingSkeleton className="skeleton-stat" /></section>
+    <section className="content-grid"><LoadingSkeleton className="skeleton-panel" /><LoadingSkeleton className="skeleton-panel" /></section>
+  </div>;
+}
+
+function TransactionDetailView({ transaction, goTo, showToast }) {
+  const [pdfState, setPdfState] = useState("idle");
+  if (!transaction) {
+    return <div className="standard-view"><div className="panel empty-state"><span className="empty-icon"><ReceiptText size={22} /></span><h3>Transaction not found</h3><p>Return to Activity to choose a transaction.</p><button className="primary-button" onClick={() => goTo("activity")}>Back to activity <ArrowRight size={15} /></button></div></div>;
+  }
+  const Icon = transaction.icon || ReceiptText;
+  const isPositive = transaction.amount?.startsWith("+");
+  const handleDownload = () => {
+    setPdfState("loading");
+    window.setTimeout(() => {
+      try {
+        downloadTransactionPdf(transaction);
+        setPdfState("success");
+        showToast("Receipt PDF downloaded");
+      } catch (error) {
+        console.error(error);
+        setPdfState("error");
+        showToast("Receipt PDF could not be created");
+      }
+    }, 260);
+  };
+  return <div className="standard-view transaction-detail-view">
+    <button className="back-link" onClick={() => goTo(transaction.origin || "activity")}><ArrowLeft size={16} /> Back to {transaction.origin === "dashboard" ? "overview" : transaction.origin === "orange-card-receipt" ? "receipt" : "activity"}</button>
+    <div className="transaction-detail-header"><div><span className="eyebrow">Transaction details</span><h2>{transaction.type}</h2><p>Review the complete record for this merchant activity.</p></div><button className="primary-button" onClick={handleDownload} disabled={pdfState === "loading"}>{pdfState === "loading" ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />} {pdfState === "loading" ? "Preparing PDF…" : "Download receipt"}</button></div>
+    {pdfState === "error" && <p className="form-error" role="alert">The PDF could not be prepared. Please try again.</p>}
+    {pdfState === "success" && <p className="download-success" role="status"><Check size={15} /> Receipt PDF is ready in your downloads.</p>}
+    <div className="transaction-detail-grid">
+      <section className="panel transaction-summary-card"><span className={`transaction-detail-icon ${transaction.tone}`}><Icon size={22} /></span><span className="eyebrow">{transaction.status}</span><h3>{transaction.name}</h3><strong className={`transaction-detail-amount ${isPositive ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small></strong><span className={`status-chip ${transaction.tone}`}>{transaction.status}</span><p className="transaction-detail-note">Demo record — no real funds were moved.</p></section>
+      <section className="panel transaction-information"><div className="panel-header"><div><span className="eyebrow">Receipt information</span><h3>Transaction record</h3></div><ReceiptText size={20} className="heading-icon" /></div><div className="detail-list"><div><span>Reference</span><strong>{transaction.reference || transaction.id}</strong></div><div><span>Date</span><strong>{transaction.date || transaction.time}</strong></div><div><span>Channel</span><strong>{transaction.channel || "Merchant workspace"}</strong></div><div><span>Counterparty</span><strong>{transaction.name}</strong></div>{Object.entries(transaction.details || {}).map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div></section>
+    </div>
+  </div>;
+}
+
+function PinEntry({ title, description, onSuccess, compact = false }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [faceIdLoading, setFaceIdLoading] = useState(false);
+  const [showDemoPin, setShowDemoPin] = useState(false);
+  const submit = (nextPin) => {
+    if (nextPin.length < 4) return;
+    if (nextPin === DEMO_PIN) {
+      setError("");
+      onSuccess();
+      return;
+    }
+    setError("Code incorrect. Try again.");
+    setPin("");
+  };
+  const addDigit = (digit) => {
+    if (pin.length >= 4) return;
+    const nextPin = `${pin}${digit}`;
+    setPin(nextPin);
+    setError("");
+    if (nextPin.length === 4) window.setTimeout(() => submit(nextPin), 120);
+  };
+  const useFaceId = () => {
+    setFaceIdLoading(true);
+    window.setTimeout(() => { setFaceIdLoading(false); onSuccess(); }, 550);
+  };
+  return <div className={`pin-entry ${compact ? "pin-entry-compact" : ""}`}>
+    <div className="pin-lock-mark"><LockKeyhole size={21} /></div>
+    <h2>{title}</h2><p>{description}</p>
+    <div className={`pin-dots ${error ? "has-error" : ""}`} aria-label={`${pin.length} of 4 digits entered`}>{[0, 1, 2, 3].map((index) => <span className={index < pin.length ? "filled" : ""} key={index}>{index < pin.length && visible ? pin[index] : ""}</span>)}</div>
+    {error && <p className="pin-error" role="alert">{error}</p>}
+    <button className="pin-visibility" onClick={() => setVisible((value) => !value)}><Eye size={15} /> {visible ? "Hide digits" : "Show digits"}</button>
+    <div className="pin-keypad" aria-label="PIN keypad">{["1","2","3","4","5","6","7","8","9"].map((digit) => <button key={digit} onClick={() => addDigit(digit)}>{digit}</button>)}<button className="pin-face-id" onClick={useFaceId} disabled={faceIdLoading} aria-label="Use Face ID demo">{faceIdLoading ? <LoaderCircle className="spin" size={20} /> : <span className="face-id-art">⌁</span>}</button><button onClick={() => addDigit("0")}>0</button><button className="pin-delete" onClick={() => { setPin((value) => value.slice(0, -1)); setError(""); }} aria-label="Delete last digit">⌫</button></div>
+    <button className="pin-forgot" onClick={() => setShowDemoPin((value) => !value)}>Code oublié ?</button>
+    {showDemoPin && <p className="pin-demo-note">Demo code: <strong>1234</strong></p>}
+  </div>;
+}
+
+function PinDialog({ mode, onClose, onSuccess, onLock }) {
+  return <div className="modal-scrim pin-scrim"><div className="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pin-title"><button className="modal-close" onClick={onClose} aria-label="Close PIN dialog"><X size={18} /></button><PinEntry title="Confirmez votre code PIN" description="Saisissez votre code à 4 chiffres pour continuer." onSuccess={onSuccess} /><div className="pin-dialog-footer"><span><ShieldCheck size={14} /> Demo only — this is not payment authentication.</span>{mode === "confirm" && <button onClick={onLock}><LockKeyhole size={14} /> Lock app now</button>}</div></div></div>;
+}
+
+function LockScreen({ onUnlock }) {
+  return <div className="lock-screen"><div className="lock-screen-brand"><OrangeLogo /><span>Merchant workspace</span></div><PinEntry title="Application verrouillée" description="Saisissez votre code PIN pour déverrouiller." onSuccess={onUnlock} compact /><p className="lock-screen-note">Code oublié ? This local demo uses 1234.</p></div>;
+}
+
+function Dashboard({ goTo, showToast, openTransaction }) {
   const [balanceVisible, setBalanceVisible] = useState(true);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoading(false), 350);
+    return () => window.clearTimeout(timer);
+  }, []);
+  if (loading) return <DashboardSkeleton />;
   return <div className="dashboard-view">
     <div className="desktop-dashboard">
     <section className="welcome-row"><div><span className="eyebrow">Wednesday, 24 April 2024</span><h2>Good morning, Seydou <span className="wave">✦</span></h2><p>Here’s what’s happening with your business today.</p></div><button className="outline-button date-button" onClick={() => showToast("Showing today’s activity")}><CalendarDays size={17} /> Today <ChevronDown size={15} /></button></section>
@@ -204,7 +418,7 @@ function Dashboard({ goTo, showToast }) {
       </div>
     </section>
     <section className="stats-row"><StatCard label="Today’s collections" value="67,750" suffix="FCFA" trend="+12.8%" trendText="vs yesterday" icon={ArrowDownLeft} tone="green" /><StatCard label="Transactions" value="24" suffix="" trend="+4" trendText="vs yesterday" icon={ReceiptText} tone="blue" /><StatCard label="This month’s revenue" value="1,842,500" suffix="FCFA" trend="+8.4%" trendText="vs last month" icon={BarChart3} tone="orange" /></section>
-    <section className="content-grid"><div className="panel recent-panel"><div className="panel-header"><div><span className="eyebrow">Latest activity</span><h3>Recent transactions</h3></div><button className="text-button" onClick={() => goTo("activity")}>View activity <ArrowRight size={15} /></button></div><TransactionList compact showToast={showToast} /></div>
+     <section className="content-grid"><div className="panel recent-panel"><div className="panel-header"><div><span className="eyebrow">Latest activity</span><h3>Recent transactions</h3></div><button className="text-button" onClick={() => goTo("activity")}>View activity <ArrowRight size={15} /></button></div><TransactionList compact showToast={showToast} openTransaction={openTransaction} /></div>
        <div className="panel register-summary"><div className="panel-header"><div><span className="eyebrow">Today’s operations</span><h3>Cash register</h3></div><button className="more-button" onClick={() => showToast("Register actions are available in Cash register")} aria-label="More cash register actions"><MoreHorizontal size={18} /></button></div><div className="register-status"><span className="status-check"><Check size={18} /></span><div><strong>Register is open</strong><p>Opened at 08:01 by Seydou</p></div></div><div className="register-total"><span>Current cash balance</span><strong>124,500 <small>FCFA</small></strong></div><div className="register-breakdown"><div><span>Opening balance</span><strong>50,000</strong></div><div><span>Cash sales</span><strong className="positive">+ 74,500</strong></div></div><button className="wide-outline-button" onClick={() => goTo("register")}>Manage register <ArrowRight size={15} /></button></div>
     </section>
     </div>
@@ -465,7 +679,10 @@ function MobileOrangeMoneyFlowPage({ flowId, goTo, showToast }) {
   };
   const confirm = () => {
     setStep("success");
-    showToast(`${config.title} completed in demo mode`);
+    showToast(`${config.title} completed in demo mode`, {
+      type: "transaction_completed",
+      payload: { flowId, amount: amount || null, phone: phone || null, merchant: merchant || null, note: note || null, location: location || null },
+    });
   };
 
   return <div className="mobile-orange-flow-page">
@@ -521,16 +738,32 @@ function PlusBadge() {
   return <span className="plus-badge">+</span>;
 }
 
-function OrangeMoneyReceiptView({ goTo }) {
+function OrangeMoneyReceiptView({ goTo, showToast, openTransaction }) {
+  const [pdfState, setPdfState] = useState("idle");
+  const downloadReceipt = () => {
+    setPdfState("loading");
+    window.setTimeout(() => {
+      try {
+        downloadTransactionPdf(cardReceiptTransaction);
+        setPdfState("success");
+        showToast("Receipt PDF downloaded");
+      } catch (error) {
+        console.error(error);
+        setPdfState("error");
+        showToast("Receipt PDF could not be created");
+      }
+    }, 260);
+  };
   return <div className="mobile-orange-receipt-page">
-    <div className="mobile-flow-header"><button onClick={() => goTo("orange-virtual-card")}><ArrowLeft size={18} /> Virtual card</button><span className="receipt-download"><Download size={19} /></span></div>
+    <div className="mobile-flow-header"><button onClick={() => goTo("orange-virtual-card")}><ArrowLeft size={18} /> Virtual card</button><button className="receipt-download" onClick={downloadReceipt} disabled={pdfState === "loading"} aria-label="Download receipt PDF">{pdfState === "loading" ? <LoaderCircle className="spin" size={19} /> : <Download size={19} />}</button></div>
     <div className="receipt-brand"><OrangeQrLogo /><span>Orange<br />Money</span></div>
     <section className="receipt-heading"><h1>Receipt</h1><p>Edition date: June 18, 2025</p></section>
     <div className="receipt-rule" />
     <ReceiptSection title="Transaction"><ReceiptRow label="Type" value="Cash in" /><ReceiptRow label="Amount" value="1,000 Le" /><ReceiptRow label="Date" value="06/16/25 · 12:17" /><ReceiptRow label="Reference" value="CI250616.1217.B95780" /><ReceiptRow label="Status" value="Success" success /></ReceiptSection>
     <ReceiptSection title="Retailer"><ReceiptRow label="Agent code" value="219492" /><ReceiptRow label="Phone number" value="74 741337" /></ReceiptSection>
     <ReceiptSection title="Customer"><ReceiptRow label="Phone number" value="78 973040" /></ReceiptSection>
-    <button className="mobile-flow-primary receipt-done" onClick={() => goTo("orange-virtual-card")}>Back to card <ArrowRight size={16} /></button>
+    {pdfState === "success" && <p className="download-success" role="status"><Check size={14} /> PDF saved to downloads</p>}{pdfState === "error" && <p className="form-error" role="alert">The PDF could not be prepared. Try again.</p>}
+    <div className="receipt-actions"><button className="mobile-flow-secondary" onClick={() => openTransaction ? openTransaction(cardReceiptTransaction) : goTo("orange-virtual-card")}>View full details <ArrowRight size={16} /></button><button className="mobile-flow-primary receipt-done" onClick={downloadReceipt}><Download size={16} /> Download PDF</button></div>
   </div>;
 }
 
@@ -587,7 +820,10 @@ function OrangeMoneyServiceDetailView({ serviceId, goTo, showToast }) {
 
   const confirm = () => {
     setStep("success");
-    showToast(`${config.title} completed in demo mode`);
+    showToast(`${config.title} completed in demo mode`, {
+      type: "service_completed",
+      payload: { serviceId, service: config.title, values },
+    });
   };
 
   const displayValue = (field) => {
@@ -689,11 +925,11 @@ function StatCard({ label, value, suffix, trend, trendText, icon: Icon, tone }) 
   return <div className="stat-card"><div className={`stat-icon ${tone}-icon`}><Icon size={18} /></div><div className="stat-copy"><span>{label}</span><strong>{value} <small>{suffix}</small></strong><p><b className={tone === "orange" ? "orange-text" : "green-text"}>{trend}</b> {trendText}</p></div></div>;
 }
 
-function TransactionList({ showToast }) {
-  return <div className="transaction-list">{transactions.map((transaction) => { const Icon = transaction.icon; return <button className="transaction-row" key={transaction.id} onClick={() => showToast(`Opened ${transaction.id}`)}><span className={`transaction-icon ${transaction.tone}`}><Icon size={16} /></span><span className="transaction-copy"><strong>{transaction.name}</strong><small>{transaction.type} <span>·</span> {transaction.time}</small></span><span className={`transaction-amount ${transaction.amount.startsWith("+") ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small><em className={`status-chip ${transaction.tone}`}>{transaction.status}</em></span><ChevronRight size={16} className="row-chevron" /></button>; })}</div>;
+function TransactionList({ showToast, openTransaction }) {
+  return <div className="transaction-list">{transactions.map((transaction) => { const Icon = transaction.icon; return <button className="transaction-row" key={transaction.id} onClick={() => openTransaction ? openTransaction(transaction) : showToast(`Opened ${transaction.id}`)}><span className={`transaction-icon ${transaction.tone}`}><Icon size={16} /></span><span className="transaction-copy"><strong>{transaction.name}</strong><small>{transaction.type} <span>·</span> {transaction.time}</small></span><span className={`transaction-amount ${transaction.amount.startsWith("+") ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small><em className={`status-chip ${transaction.tone}`}>{transaction.status}</em></span><ChevronRight size={16} className="row-chevron" /></button>; })}</div>;
 }
 
-function CollectionsView({ showToast }) {
+function CollectionsView({ showToast, openTransaction }) {
   const [step, setStep] = useState("form");
   const [amount, setAmount] = useState("");
   const [customer, setCustomer] = useState("");
@@ -714,11 +950,11 @@ function CollectionsView({ showToast }) {
     setFormMessage("");
     setStep("review");
   };
-  if (step === "success") return <SuccessState type="collection" amount={amount} customer={customer || "Customer"} reset={reset} showToast={showToast} />;
+  if (step === "success") return <SuccessState type="collection" amount={amount} customer={customer || "Customer"} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
   return <div className="flow-view">
     <PageIntro eyebrow="Payments" title="Collect a payment" description="Create a secure payment request for your customer." action={<button className="soft-button" onClick={reset}><ReceiptText size={16} /> New collection</button>} />
     <FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Payment details", "Review", "Complete"]} />
-     {step === "processing" ? <ProcessingState label="Waiting for payment" detail="Your customer is completing the payment request." /> : step === "review" ? <CollectionReview amount={amount} customer={customer} note={note} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => setStep("success"), 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Payment details</h3></div><span className="required-note">All fields marked * are required</span></div><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><label className="field-label">Customer phone number <span>*</span><div className={`input-with-prefix ${customerInvalid ? "has-error" : ""}`}><span>+226</span><input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="70 00 00 00" value={customer} onChange={(event) => { setCustomer(event.target.value); setFormMessage(""); }} aria-invalid={customerInvalid} /></div>{customerInvalid && <small className="field-error">Use 8 digits, for example 70 00 00 00.</small>}</label><label className="field-label">Reference <small>Optional</small><input type="text" placeholder="e.g. Order #1042" value={note} onChange={(event) => setNote(event.target.value)} /></label><button className="primary-button form-submit" disabled={!amount || !customer} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><ShieldCheck size={15} /> Your customer will receive a secure payment prompt.</p></div><div className="panel side-info-panel"><span className="info-symbol"><Smartphone size={19} /></span><h3>How it works</h3><ol><li><span>1</span><div><strong>Enter the amount</strong><p>Tell us how much your customer needs to pay.</p></div></li><li><span>2</span><div><strong>Send the request</strong><p>They’ll confirm directly from their phone.</p></div></li><li><span>3</span><div><strong>Get notified</strong><p>We’ll confirm when the payment is complete.</p></div></li></ol><div className="info-callout">No fees are charged to your customer for this request.</div></div></div>}
+     {step === "processing" ? <ProcessingState label="Waiting for payment" detail="Your customer is completing the payment request." /> : step === "review" ? <CollectionReview amount={amount} customer={customer} note={note} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => { setStep("success"); showToast("Payment request saved", { type: "transaction_completed", payload: { flowId: "collect-payment", amount, phone: customer, note: note || null } }); }, 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Payment details</h3></div><span className="required-note">All fields marked * are required</span></div><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><label className="field-label">Customer phone number <span>*</span><div className={`input-with-prefix ${customerInvalid ? "has-error" : ""}`}><span>+226</span><input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="70 00 00 00" value={customer} onChange={(event) => { setCustomer(event.target.value); setFormMessage(""); }} aria-invalid={customerInvalid} /></div>{customerInvalid && <small className="field-error">Use 8 digits, for example 70 00 00 00.</small>}</label><label className="field-label">Reference <small>Optional</small><input type="text" placeholder="e.g. Order #1042" value={note} onChange={(event) => setNote(event.target.value)} /></label><button className="primary-button form-submit" disabled={!amount || !customer} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><ShieldCheck size={15} /> Your customer will receive a secure payment prompt.</p></div><div className="panel side-info-panel"><span className="info-symbol"><Smartphone size={19} /></span><h3>How it works</h3><ol><li><span>1</span><div><strong>Enter the amount</strong><p>Tell us how much your customer needs to pay.</p></div></li><li><span>2</span><div><strong>Send the request</strong><p>They’ll confirm directly from their phone.</p></div></li><li><span>3</span><div><strong>Get notified</strong><p>We’ll confirm when the payment is complete.</p></div></li></ol><div className="info-callout">No fees are charged to your customer for this request.</div></div></div>}
   </div>;
 }
 
@@ -726,7 +962,7 @@ function CollectionReview({ amount, customer, note, onBack, onConfirm }) {
   return <div className="panel review-panel"><div className="review-icon orange-bg"><ArrowDownLeft size={24} /></div><span className="eyebrow">Review request</span><h3>Check the payment details</h3><p className="review-lead">You’re about to request a payment from this customer.</p><div className="review-amount">{formatNumber(amount)} <small>FCFA</small></div><div className="detail-list"><div><span>Customer</span><strong>+226 {customer}</strong></div><div><span>Reference</span><strong>{note || "No reference"}</strong></div><div><span>Processing fee</span><strong>0 FCFA</strong></div></div><div className="review-actions"><button className="outline-button" onClick={onBack}><ArrowLeft size={16} /> Edit details</button><button className="primary-button" onClick={onConfirm}>Send payment request <ArrowRight size={16} /></button></div></div>;
 }
 
-function TransfersView({ showToast }) {
+function TransfersView({ showToast, openTransaction }) {
   const [step, setStep] = useState("form");
   const [amount, setAmount] = useState("");
   const [beneficiary, setBeneficiary] = useState("Airtel distribution");
@@ -742,8 +978,8 @@ function TransfersView({ showToast }) {
     setFormMessage("");
     setStep("review");
   };
-  if (step === "success") return <SuccessState type="transfer" amount={amount} customer={beneficiary} reset={reset} showToast={showToast} />;
-  return <div className="flow-view"><PageIntro eyebrow="Money movement" title="Transfer funds" description="Send money from your merchant accounts to a beneficiary." action={<button className="soft-button" onClick={() => showToast("Transfer history opened in demo mode")}><BookOpen size={16} /> Transfer history</button>} /><FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Transfer details", "Review", "Complete"]} />{step === "processing" ? <ProcessingState label="Processing transfer" detail="This usually takes a few seconds." /> : step === "review" ? <TransferReview amount={amount} beneficiary={beneficiary} source={source} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => setStep("success"), 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Transfer details</h3></div></div><label className="field-label">From account <span>*</span><div className="select-wrap"><WalletCards size={17} /><select value={source} onChange={(event) => setSource(event.target.value)}><option>Main account · 286,450 FCFA</option><option>Settlement account · 814,200 FCFA</option></select><ChevronDown size={16} /></div></label><label className="field-label">Beneficiary <span>*</span><div className="select-wrap"><UsersRound size={17} /><select value={beneficiary} onChange={(event) => setBeneficiary(event.target.value)}><option>Airtel distribution</option><option>Issouf Kaboré · +226 70 82 11 04</option><option>New beneficiary</option></select><ChevronDown size={16} /></div></label><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><button className="primary-button form-submit" disabled={!amount} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><LockKeyhole size={15} /> Transfers are protected by merchant verification.</p></div><div className="panel side-info-panel transfer-side"><span className="info-symbol blue-bg"><ArrowUpRight size={19} /></span><h3>Transfer safely</h3><p>Choose the right account before sending funds. You can review the recipient and fees before confirming.</p><div className="limit-card"><span>Daily transfer limit</span><strong>2,000,000 FCFA</strong><div className="limit-bar"><span /></div><small>1,714,000 FCFA remaining today</small></div></div></div>}</div>;
+  if (step === "success") return <SuccessState type="transfer" amount={amount} customer={beneficiary} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
+  return <div className="flow-view"><PageIntro eyebrow="Money movement" title="Transfer funds" description="Send money from your merchant accounts to a beneficiary." action={<button className="soft-button" onClick={() => showToast("Transfer history opened in demo mode")}><BookOpen size={16} /> Transfer history</button>} /><FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Transfer details", "Review", "Complete"]} />{step === "processing" ? <ProcessingState label="Processing transfer" detail="This usually takes a few seconds." /> : step === "review" ? <TransferReview amount={amount} beneficiary={beneficiary} source={source} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => { setStep("success"); showToast("Transfer saved", { type: "transaction_completed", payload: { flowId: "transfer", amount, beneficiary, source, fee: 100 } }); }, 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Transfer details</h3></div></div><label className="field-label">From account <span>*</span><div className="select-wrap"><WalletCards size={17} /><select value={source} onChange={(event) => setSource(event.target.value)}><option>Main account · 286,450 FCFA</option><option>Settlement account · 814,200 FCFA</option></select><ChevronDown size={16} /></div></label><label className="field-label">Beneficiary <span>*</span><div className="select-wrap"><UsersRound size={17} /><select value={beneficiary} onChange={(event) => setBeneficiary(event.target.value)}><option>Airtel distribution</option><option>Issouf Kaboré · +226 70 82 11 04</option><option>New beneficiary</option></select><ChevronDown size={16} /></div></label><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><button className="primary-button form-submit" disabled={!amount} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><LockKeyhole size={15} /> Transfers are protected by merchant verification.</p></div><div className="panel side-info-panel transfer-side"><span className="info-symbol blue-bg"><ArrowUpRight size={19} /></span><h3>Transfer safely</h3><p>Choose the right account before sending funds. You can review the recipient and fees before confirming.</p><div className="limit-card"><span>Daily transfer limit</span><strong>2,000,000 FCFA</strong><div className="limit-bar"><span /></div><small>1,714,000 FCFA remaining today</small></div></div></div>}</div>;
 }
 
 function TransferReview({ amount, beneficiary, source, onBack, onConfirm }) {
@@ -758,9 +994,25 @@ function ProcessingState({ label, detail }) {
   return <div className="panel state-panel"><span className="loading-symbol"><LoaderCircle size={30} /></span><h3>{label}</h3><p>{detail}</p></div>;
 }
 
-function SuccessState({ type, amount, customer, reset, showToast }) {
+function SuccessState({ type, amount, customer, reset, showToast, openTransaction }) {
   const isTransfer = type === "transfer";
-  return <div className="panel state-panel success-panel"><span className="state-symbol success-symbol"><Check size={30} /></span><span className="eyebrow">{isTransfer ? "Transfer complete" : "Payment request sent"}</span><h3>{isTransfer ? "Your transfer was successful" : "Your request is on its way"}</h3><p>{isTransfer ? "The funds have been sent to your beneficiary." : "Your customer will receive a payment prompt on their phone."}</p><div className="success-receipt"><div><span>Amount</span><strong>{formatNumber(amount)} <small>FCFA</small></strong></div><div><span>{isTransfer ? "Beneficiary" : "Customer"}</span><strong>{customer}</strong></div><div><span>Reference</span><strong>OM-{isTransfer ? "TRF" : "REQ"}-845291</strong></div></div><div className="review-actions"><button className="outline-button" onClick={reset}>Make another {isTransfer ? "transfer" : "collection"}</button><button className="primary-button" onClick={() => showToast("Receipt download simulated")}><Download size={16} /> Download receipt</button></div></div>;
+  const [pdfState, setPdfState] = useState("idle");
+  const transaction = { id: `OM-${isTransfer ? "TRF" : "REQ"}-845291`, name: customer, type: isTransfer ? "Transfer sent" : "Payment request", amount: `${isTransfer ? "−" : "+"} ${formatNumber(amount)}`, time: "Just now", date: "24 April 2024 · Just now", status: "Completed", tone: isTransfer ? "neutral" : "success", channel: isTransfer ? "Merchant transfer" : "Checkout", reference: `OM-${isTransfer ? "TRF" : "REQ"}-845291`, details: isTransfer ? { Beneficiary: customer, "Transfer fee": "100 FCFA" } : { "Customer phone": `+226 ${customer}`, "Processing fee": "0 FCFA" }, icon: isTransfer ? ArrowUpRight : ArrowDownLeft };
+  const downloadReceipt = () => {
+    setPdfState("loading");
+    window.setTimeout(() => {
+      try {
+        downloadTransactionPdf(transaction);
+        setPdfState("success");
+        showToast("Receipt PDF downloaded");
+      } catch (error) {
+        console.error(error);
+        setPdfState("error");
+        showToast("Receipt PDF could not be created");
+      }
+    }, 260);
+  };
+  return <div className="panel state-panel success-panel"><span className="state-symbol success-symbol"><Check size={30} /></span><span className="eyebrow">{isTransfer ? "Transfer complete" : "Payment request sent"}</span><h3>{isTransfer ? "Your transfer was successful" : "Your request is on its way"}</h3><p>{isTransfer ? "The funds have been sent to your beneficiary." : "Your customer will receive a payment prompt on their phone."}</p><div className="success-receipt"><div><span>Amount</span><strong>{formatNumber(amount)} <small>FCFA</small></strong></div><div><span>{isTransfer ? "Beneficiary" : "Customer"}</span><strong>{customer}</strong></div><div><span>Reference</span><strong>{transaction.reference}</strong></div></div>{pdfState === "success" && <p className="download-success" role="status"><Check size={14} /> PDF saved to downloads</p>}{pdfState === "error" && <p className="form-error" role="alert">The PDF could not be prepared. Try again.</p>}<div className="review-actions"><button className="outline-button" onClick={reset}>Make another {isTransfer ? "transfer" : "collection"}</button><button className="outline-button" onClick={() => openTransaction ? openTransaction(transaction) : showToast("Transaction details opened")}><ReceiptText size={16} /> View details</button><button className="primary-button" disabled={pdfState === "loading"} onClick={downloadReceipt}>{pdfState === "loading" ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />} {pdfState === "loading" ? "Preparing PDF…" : "Download receipt"}</button></div></div>;
 }
 
 function QrView({ showToast }) {
@@ -838,18 +1090,71 @@ function RevenueView({ showToast }) {
   return <div className="standard-view"><PageIntro eyebrow="Business performance" title="Revenue & performance" description="Understand how your collections are growing over time." action={<button className="outline-button" onClick={() => showToast(`Revenue report for ${period} export simulated`)}><Download size={16} /> Export report</button>} /><div className="revenue-stats"><div className="panel revenue-total"><span className="eyebrow">Total revenue</span><strong>1,842,500 <small>FCFA</small></strong><p><span className="trend-up">↗ 8.4%</span> vs previous period</p><div className="revenue-mini-bars">{values.slice(-7).map((value, index) => <span key={index} style={{ height: `${Number(value) * .62}px` }} />)}</div></div><StatCard label="Completed payments" value="418" suffix="" trend="+11.2%" trendText="vs last period" icon={Check} tone="green" /><StatCard label="Average transaction" value="4,408" suffix="FCFA" trend="+3.6%" trendText="vs last period" icon={BarChart3} tone="blue" /></div><div className="panel chart-panel"><div className="panel-header chart-header"><div><span className="eyebrow">Collection volume</span><h3>Revenue over time</h3></div><div className="segmented-control" role="tablist" aria-label="Revenue period">{["7 days", "30 days", "90 days"].map((item) => <button key={item} role="tab" aria-selected={period === item} className={period === item ? "active" : ""} onClick={() => setPeriod(item)}>{item}</button>)}</div></div><div className="chart-wrap"><div className="chart-y-labels"><span>100k</span><span>75k</span><span>50k</span><span>25k</span><span>0</span></div><div className="chart"><div className="chart-gridlines"><i /><i /><i /><i /><i /></div><svg viewBox="0 0 760 240" preserveAspectRatio="none" role="img" aria-label={`Revenue chart for ${period}`}><defs><linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#f56b2a" stopOpacity=".22" /><stop offset="1" stopColor="#f56b2a" stopOpacity="0" /></linearGradient></defs><path d={`M 0 206 ${values.map((v, i) => `L ${(i / (values.length - 1)) * 760} ${220 - Number(v) * 1.9}`).join(" ")} L 760 240 L 0 240 Z`} fill="url(#areaFill)" /><path d={points} fill="none" stroke="#f56b2a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />{values.map((v, i) => <circle key={i} cx={(i / (values.length - 1)) * 760} cy={220 - Number(v) * 1.9} r="4" fill="#fff" stroke="#f56b2a" strokeWidth="2" />)}</svg><div className="chart-x-labels"><span>Apr 01</span><span>Apr 08</span><span>Apr 15</span><span>Apr 22</span><span>Today</span></div></div></div></div></div>;
 }
 
-function ActivityView({ showToast }) {
+function ActivityView({ showToast, openTransaction }) {
   const [filter, setFilter] = useState("All activity");
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [dateRange, setDateRange] = useState("All dates");
+  const [savedEvents, setSavedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setLoadError("");
+    fetch("/api/events?limit=12")
+      .then((response) => {
+        if (!response.ok) throw new Error(`Activity load failed with status ${response.status}`);
+        return response.json();
+      })
+      .then((data) => { if (mounted) setSavedEvents(data.events || []); })
+      .catch((error) => { console.error(error); if (mounted) setLoadError("Activity could not be loaded."); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, [loadAttempt]);
+  const savedItems = savedEvents.map((event) => {
+    const payload = event.payload || {};
+    const amount = Number(payload.amount) > 0 ? `${formatNumber(payload.amount)} FCFA` : "";
+    const title = payload.message || (event.event_type === "navigation" ? `Opened ${event.view_id}` : event.event_type.replaceAll("_", " "));
+    const isTransfer = payload.flowId === "transfer";
+    const eventTransaction = event.event_type.includes("completed") ? {
+      id: payload.reference || `OM-${isTransfer ? "TRF" : "PAY"}-${event.id}`,
+      name: payload.beneficiary || payload.merchant || (payload.phone ? `+226 ${payload.phone}` : "Demo customer"),
+      type: isTransfer ? "Transfer sent" : "Payment received",
+      amount: `${isTransfer ? "−" : "+"} ${formatNumber(payload.amount)}`,
+      time: new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      date: new Date(event.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }),
+      status: "Completed",
+      tone: isTransfer ? "neutral" : "success",
+      channel: isTransfer ? "Merchant transfer" : "Checkout",
+      reference: payload.reference || `OM-${isTransfer ? "TRF" : "PAY"}-${event.id}`,
+      details: payload.phone ? { "Phone number": `+226 ${payload.phone}` } : {},
+      icon: isTransfer ? ArrowUpRight : ArrowDownLeft,
+    } : null;
+    return {
+      title: title.charAt(0).toUpperCase() + title.slice(1),
+      detail: `${event.view_id} · Saved to database`,
+      amount,
+      time: new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      icon: event.event_type.includes("completed") ? Check : Clock3,
+      tone: event.event_type.includes("completed") ? "success" : "blue",
+      transaction: eventTransaction,
+    };
+  });
+  const staticItems = activityEvents.map((group) => ({ ...group, items: group.items.map((item) => ({ ...item, transaction: item.transactionId ? transactions.find((transaction) => transaction.id === item.transactionId) : null })) }));
+  const eventGroups = savedItems.length ? [{ date: "Saved in database", items: savedItems }, ...staticItems] : staticItems;
   const searchQuery = query.trim().toLowerCase();
-  const filtered = activityEvents.map((group) => ({ ...group, items: group.items.filter((item) => {
+  const filtered = eventGroups.map((group) => ({ ...group, items: group.items.filter((item) => {
     const matchesCategory = filter === "All activity" || (filter === "Payments" && item.title.includes("Payment")) || (filter === "Transfers" && item.title.includes("Transfer")) || (filter === "Operations" && !item.title.includes("Payment") && !item.title.includes("Transfer"));
     const matchesQuery = !searchQuery || `${item.title} ${item.detail} ${item.amount}`.toLowerCase().includes(searchQuery);
     return matchesCategory && matchesQuery;
   }) })).filter((group) => group.items.length);
-  return <div className="standard-view"><PageIntro eyebrow="Merchant activity" title="Activity" description="A complete timeline of payments, transfers, and account events." action={<button className="outline-button" onClick={() => showToast("Activity export simulated")}><Download size={16} /> Export activity</button>} /><div className="activity-toolbar"><div className="search-field"><Search size={17} /><input aria-label="Search activity" placeholder="Search activity" value={query} onChange={(event) => setQuery(event.target.value)} /></div><div className="filter-pills" role="tablist" aria-label="Activity categories">{["All activity", "Payments", "Transfers", "Operations"].map((item) => <button role="tab" aria-selected={filter === item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)} key={item}>{item}</button>)}</div><button className={`outline-button filter-button ${filtersOpen ? "selected" : ""}`} onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}><Filter size={16} /> Filters</button></div>{filtersOpen && <div className="filter-panel"><label>Date range<select value={dateRange} onChange={(event) => { setDateRange(event.target.value); showToast(`Date range set to ${event.target.value}`); }}><option>All dates</option><option>Today</option><option>Last 7 days</option><option>This month</option></select></label><button className="text-button" onClick={() => { setDateRange("All dates"); setFilter("All activity"); setQuery(""); showToast("Activity filters cleared"); }}>Clear filters <X size={14} /></button></div>}<div className="activity-timeline">{filtered.length ? filtered.map((group) => <div className="timeline-group" key={group.date}><h3>{group.date}</h3>{group.items.map((item, index) => { const Icon = item.icon; return <button className="timeline-item" key={`${group.date}-${index}`} onClick={() => showToast(`${item.title} details opened`)}><div className={`timeline-icon ${item.tone}`}><Icon size={16} /></div><div className="timeline-copy"><strong>{item.title}</strong><p>{item.detail}</p></div><div className="timeline-amount"><strong className={item.amount.startsWith("+") ? "positive" : ""}>{item.amount}</strong><span>{item.time}</span></div><ChevronRight size={16} /></button>; })}</div>) : <div className="panel empty-state"><span className="empty-icon"><Search size={22} /></span><h3>No activity found</h3><p>Try a different search or activity filter.</p></div>}</div></div>;
+  return <div className="standard-view"><PageIntro eyebrow="Merchant activity" title="Activity" description="A complete timeline of payments, transfers, and account events." action={<button className="outline-button" onClick={() => showToast("Activity export simulated")}><Download size={16} /> Export activity</button>} /><div className="activity-toolbar"><div className="search-field"><Search size={17} /><input aria-label="Search activity" placeholder="Search activity" value={query} onChange={(event) => setQuery(event.target.value)} /></div><div className="filter-pills" role="tablist" aria-label="Activity categories">{["All activity", "Payments", "Transfers", "Operations"].map((item) => <button role="tab" aria-selected={filter === item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)} key={item}>{item}</button>)}</div><button className={`outline-button filter-button ${filtersOpen ? "selected" : ""}`} onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}><Filter size={16} /> Filters</button></div>{filtersOpen && <div className="filter-panel"><label>Date range<select value={dateRange} onChange={(event) => { setDateRange(event.target.value); showToast(`Date range set to ${event.target.value}`); }}><option>All dates</option><option>Today</option><option>Last 7 days</option><option>This month</option></select></label><button className="text-button" onClick={() => { setDateRange("All dates"); setFilter("All activity"); setQuery(""); showToast("Activity filters cleared"); }}>Clear filters <X size={14} /></button></div>}{loading ? <ActivitySkeleton /> : loadError ? <div className="panel error-state" role="alert"><CircleHelp size={20} /><h3>We couldn’t load activity</h3><p>{loadError}</p><button className="outline-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button></div> : <div className="activity-timeline">{filtered.length ? filtered.map((group) => <div className="timeline-group" key={group.date}><h3>{group.date}</h3>{group.items.map((item, index) => { const Icon = item.icon; return <button className="timeline-item" key={`${group.date}-${index}`} onClick={() => item.transaction ? openTransaction(item.transaction) : showToast(`${item.title} details opened`)}><div className={`timeline-icon ${item.tone}`}><Icon size={16} /></div><div className="timeline-copy"><strong>{item.title}</strong><p>{item.detail}</p></div><div className="timeline-amount"><strong className={item.amount.startsWith("+") ? "positive" : ""}>{item.amount}</strong><span>{item.time}</span></div><ChevronRight size={16} /></button>; })}</div>) : <div className="panel empty-state"><span className="empty-icon"><Search size={22} /></span><h3>No activity found</h3><p>Try a different search or activity filter.</p></div>}</div>}</div>;
+}
+
+function ActivitySkeleton() {
+  return <div className="activity-timeline loading-view" role="status" aria-label="Loading activity">{[1, 2, 3, 4].map((item) => <div className="timeline-item skeleton-row" key={item}><LoadingSkeleton className="skeleton-circle" /><span className="skeleton-lines"><LoadingSkeleton /><LoadingSkeleton /></span><LoadingSkeleton className="skeleton-amount" /></div>)}</div>;
 }
 
 function VerifyView({ showToast, embedded = false }) {
@@ -866,10 +1171,36 @@ function VerifyView({ showToast, embedded = false }) {
   return <div className={embedded ? "verify-embedded" : "standard-view"}>{!embedded && <PageIntro eyebrow="Verification" title="Scan & verify" description="Check a payment QR code or transaction reference before handing over goods." action={<button className="outline-button" onClick={() => showToast("Verification history opened in demo mode")}><BookOpen size={16} /> Verification history</button>} />}{state === "success" ? <div className="panel verify-result"><span className="state-symbol success-symbol"><Check size={28} /></span><span className="eyebrow">Payment verified</span><h3>This payment is valid</h3><p>The transaction has been confirmed and the funds are available to the merchant.</p><div className="verify-detail"><div><span>Amount</span><strong>42,000 FCFA</strong></div><div><span>From</span><strong>Mariam Ouédraogo</strong></div><div><span>Reference</span><strong>OM-PAY-845101</strong></div><div><span>Verified</span><strong>Just now</strong></div></div><div className="review-actions"><button className="outline-button" onClick={() => setState("idle")}>Scan another</button><button className="primary-button" onClick={() => { setState("idle"); showToast("Payment marked as verified"); }}><Check size={16} /> Done</button></div></div> : <div className="verify-layout"><div className="panel scanner-panel"><div className={`scanner-viewport ${state === "scanning" ? "is-scanning" : ""}`}><div className="scanner-corner top-left" /><div className="scanner-corner top-right" /><div className="scanner-corner bottom-left" /><div className="scanner-corner bottom-right" />{state === "scanning" && <span className="scan-line" />}{state === "scanning" ? <LoaderCircle className="scanner-loader" size={30} /> : <ScanLine className="scanner-placeholder" size={48} />}</div><h3>{state === "scanning" ? "Looking for a code…" : "Scan a payment QR code"}</h3><p>Position the customer’s QR code inside the frame.</p><button className="primary-button" onClick={begin} disabled={state === "scanning"}>{state === "scanning" ? "Scanning…" : "Start scanner"} <ScanLine size={16} /></button><button className="text-button manual-button" onClick={() => setManualOpen(true)}>Enter reference manually <ArrowRight size={15} /></button></div><div className="panel verify-side"><span className="info-symbol green-bg"><ShieldCheck size={19} /></span><h3>Verify before delivery</h3><p>Only hand over goods once a payment shows as verified in this workspace.</p><div className="verify-note"><Check size={15} /><span>Real-time confirmation</span></div><div className="verify-note"><Check size={15} /><span>Protected transaction details</span></div><div className="verify-note"><Check size={15} /><span>Works with merchant QR codes</span></div></div></div>}{manualOpen && <div className="modal-scrim"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="manual-reference-title"><button className="modal-close" onClick={() => setManualOpen(false)} aria-label="Close dialog"><X size={18} /></button><span className="modal-icon blue-bg"><FileCheck2 size={20} /></span><span className="eyebrow">Manual verification</span><h3 id="manual-reference-title">Enter a transaction reference</h3><p>Use the reference shown on the customer’s receipt to simulate a verification.</p><label className="field-label" htmlFor="manual-reference">Transaction reference<input id="manual-reference" type="text" placeholder="e.g. OM-PAY-845101" value={manualReference} onChange={(event) => setManualReference(event.target.value)} autoFocus /></label><div className="modal-actions"><button className="outline-button" onClick={() => setManualOpen(false)}>Cancel</button><button className="primary-button" onClick={submitManualReference} disabled={!manualReference.trim()}>Verify reference <Check size={16} /></button></div></div></div>}</div>;
 }
 
-function ProfileView({ showToast }) {
+function ProfileView({ showToast, onSecurity, onLock }) {
   const [language, setLanguage] = useState("Français");
-  const showSetting = (name) => showToast(`${name} opened in demo mode`);
-  return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." action={<button className="outline-button" onClick={() => showToast("Support center opened in demo mode")}><CircleHelp size={16} /> Help center</button>} /><div className="profile-layout"><div className="panel profile-card"><div className="profile-cover" /><div className="profile-card-body"><div className="profile-avatar xl">SM</div><span className="verified-badge"><ShieldCheck size={14} /> Verified merchant</span><h3>Seydou Maïga</h3><p>Store manager · Sahel Market</p><button className="outline-button" onClick={() => showToast("Profile editing is available in the full app")}>Edit profile</button><div className="profile-contact"><div><Smartphone size={16} /><span>+226 70 82 11 04</span></div><div><BriefcaseBusiness size={16} /><span>Merchant ID: OM-1048293</span></div></div></div></div><div className="settings-sections"><SettingsSection title="Business account" items={[["Business details", "Sahel Market · Ouagadougou", Store], ["Account information", "Primary account · 4821", WalletCards], ["Team members", "2 active members", UsersRound]]} onSelect={showSetting} /></div><div className="settings-sections"><SettingsSection title="Security & preferences" items={[["Security", "PIN, devices, and sign-in", LockKeyhole], ["Notifications", "Payment and activity alerts", Bell]]} onSelect={showSetting} /><div className="setting-row language-row"><span className="setting-icon"><Settings2 size={17} /></span><div><strong>Language</strong><small>Choose your preferred language</small></div><select aria-label="Language" value={language} onChange={(event) => { setLanguage(event.target.value); showToast(`Language set to ${event.target.value}`); }}><option>Français</option><option>English</option></select></div></div></div></div>;
+  const [loading, setLoading] = useState(true);
+  const [settingsError, setSettingsError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setSettingsError("");
+    fetch("/api/settings")
+      .then((response) => {
+        if (!response.ok) throw new Error(`Settings load failed with status ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        const savedLanguage = data.settings?.find((setting) => setting.setting_key === "language")?.setting_value;
+        if (mounted && typeof savedLanguage === "string") setLanguage(savedLanguage);
+      })
+      .catch((error) => { console.error(error); if (mounted) setSettingsError("Preferences could not be loaded."); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }, [loadAttempt]);
+  const showSetting = (name) => name === "Security" ? onSecurity() : showToast(`${name} opened in demo mode`);
+  if (loading) return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." /><ProfileSkeleton /></div>;
+  if (settingsError) return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." /><div className="panel error-state" role="alert"><CircleHelp size={20} /><h3>We couldn’t load settings</h3><p>{settingsError}</p><button className="outline-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button></div></div>;
+  return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." action={<button className="outline-button" onClick={() => showToast("Support center opened in demo mode")}><CircleHelp size={16} /> Help center</button>} /><div className="profile-layout"><div className="panel profile-card"><div className="profile-cover" /><div className="profile-card-body"><div className="profile-avatar xl">SM</div><span className="verified-badge"><ShieldCheck size={14} /> Verified merchant</span><h3>Seydou Maïga</h3><p>Store manager · Sahel Market</p><button className="outline-button" onClick={() => showToast("Profile editing is available in the full app")}>Edit profile</button><div className="profile-contact"><div><Smartphone size={16} /><span>+226 70 82 11 04</span></div><div><BriefcaseBusiness size={16} /><span>Merchant ID: OM-1048293</span></div></div></div></div><div className="settings-sections"><SettingsSection title="Business account" items={[["Business details", "Sahel Market · Ouagadougou", Store], ["Account information", "Primary account · 4821", WalletCards], ["Team members", "2 active members", UsersRound]]} onSelect={showSetting} /></div><div className="settings-sections"><SettingsSection title="Security & preferences" items={[["Security", "PIN, devices, and sign-in", LockKeyhole], ["Notifications", "Payment and activity alerts", Bell]]} onSelect={showSetting} /><div className="setting-row language-row"><span className="setting-icon"><Settings2 size={17} /></span><div><strong>Language</strong><small>Choose your preferred language</small></div><select aria-label="Language" value={language} onChange={(event) => { setLanguage(event.target.value); persistSetting("language", event.target.value).then(() => showToast(`Language set to ${event.target.value}`)).catch((error) => { console.error(error); showToast("Language could not be saved"); }); }}><option>Français</option><option>English</option></select></div><button className="security-lock-button" onClick={onLock}><LockKeyhole size={16} /><span><strong>Lock workspace</strong><small>Require your demo PIN to continue</small></span><ChevronRight size={16} /></button></div></div></div>;
+}
+
+function ProfileSkeleton() {
+  return <div className="profile-layout loading-view" role="status" aria-label="Loading settings"><LoadingSkeleton className="skeleton-profile-card" /><LoadingSkeleton className="skeleton-settings-card" /></div>;
 }
 
 function SettingsSection({ title, items, onSelect }) {

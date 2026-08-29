@@ -34,6 +34,102 @@ const readRequestBody = async (request) => {
   return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
 };
 
+const localWorkflowRequirements = {
+  "deposit-local": [
+    { name: "amount", type: "amount" },
+    { name: "phone", type: "phone" },
+  ],
+  transfers: [
+    { name: "amount", type: "amount" },
+    { name: "beneficiary", type: "text" },
+  ],
+  qr: [
+    { name: "amount", type: "amount" },
+    { name: "merchant", type: "text" },
+  ],
+  register: [
+    { name: "amount", type: "amount" },
+    { name: "movement", type: "text" },
+  ],
+  revenue: [
+    { name: "amount", type: "amount" },
+    { name: "source", type: "text" },
+  ],
+  verify: [
+    { name: "amount", type: "amount" },
+    { name: "reference", type: "text" },
+  ],
+  "orange-send-money": [
+    { name: "amount", type: "amount" },
+    { name: "phone", type: "phone" },
+  ],
+  "orange-withdraw-money": [
+    { name: "amount", type: "amount" },
+    { name: "location", type: "text" },
+  ],
+  "orange-pay-purchases": [
+    { name: "amount", type: "amount" },
+    { name: "merchant", type: "text" },
+  ],
+  "orange-buy-credit": [
+    { name: "amount", type: "amount" },
+    { name: "phone", type: "phone" },
+  ],
+  "orange-virtual-card": [{ name: "nickname", type: "text" }],
+  "orange-service-loyalty": [],
+  "orange-service-manage-money": [
+    { name: "amount", type: "amount" },
+    { name: "destination", type: "text" },
+  ],
+  "orange-service-boost": [],
+  "orange-service-loans": [
+    { name: "amount", type: "amount" },
+    { name: "term", type: "text" },
+  ],
+  "orange-service-bills": [
+    { name: "amount", type: "amount" },
+    { name: "biller", type: "text" },
+    { name: "customer", type: "text" },
+  ],
+  "orange-service-airtime": [
+    { name: "amount", type: "amount" },
+    { name: "phone", type: "phone" },
+  ],
+  "orange-service-data": [
+    { name: "bundle", type: "text" },
+    { name: "phone", type: "phone" },
+  ],
+  "orange-service-tv": [
+    { name: "amount", type: "amount" },
+    { name: "provider", type: "text" },
+    { name: "customer", type: "text" },
+  ],
+  "orange-service-school": [
+    { name: "amount", type: "amount" },
+    { name: "student", type: "text" },
+  ],
+  "orange-service-insurance": [{ name: "plan", type: "text" }],
+};
+
+const payloadValue = (payload, name) => payload[name] ?? payload.fields?.[name];
+const validateLocalRecord = (payload) => {
+  const flowId = typeof payload.flowId === "string" ? payload.flowId : "";
+  const requirements = localWorkflowRequirements[flowId];
+  if (!requirements) return "A valid local workflow is required.";
+
+  for (const field of requirements) {
+    const value = String(payloadValue(payload, field.name) ?? "").trim();
+    if (!value) return `${field.name} is required.`;
+    if (field.type === "amount" && (!Number.isFinite(Number(value)) || Number(value) <= 0)) {
+      return "amount must be greater than 0.";
+    }
+    if (field.type === "phone" && !/^\d{8}$/.test(value.replace(/\D/g, ""))) {
+      return "phone must contain 8 digits.";
+    }
+  }
+  return "";
+};
+
 const handleApi = async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
@@ -59,6 +155,10 @@ const handleApi = async (request, response) => {
     if (!eventType || !viewId) return json(response, 400, { error: "eventType and viewId are required." });
 
     const payload = body.payload && typeof body.payload === "object" ? body.payload : {};
+    if (eventType === "local_record_saved") {
+      const validationError = validateLocalRecord(payload);
+      if (validationError) return json(response, 400, { error: validationError });
+    }
     const result = await pool.query(
       "INSERT INTO app_events (event_type, view_id, payload) VALUES ($1, $2, $3::jsonb) RETURNING id, event_type, view_id, payload, created_at",
       [eventType, viewId, JSON.stringify(payload)],

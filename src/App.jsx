@@ -2,10 +2,11 @@ import {
   ArrowDownLeft, ArrowLeft, ArrowRight, ArrowUpRight, BarChart3, Bell, BookOpen,
   BriefcaseBusiness, CalendarDays, Check, ChevronDown, ChevronRight, CircleHelp,
   Clock3, Copy, CreditCard, Download, Eye, FileCheck2, Filter, Gift, Grid2X2, Home, LayoutDashboard,
-  LoaderCircle, LogOut, MoreHorizontal, QrCode, ReceiptText,
+  LoaderCircle, LockKeyhole, LogOut, MoreHorizontal, QrCode, ReceiptText,
   Pencil, ScanLine, Search, Send, Settings2, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Store, UserRound,
   UsersRound, WalletCards, WalletMinimal, X, Zap,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import orangeLogoAsset from "../attached_assets/image_1787793543086.png";
 
@@ -20,13 +21,74 @@ const navItems = [
   { id: "verify", label: "Scan & verify", icon: ScanLine },
 ];
 
-const transactions = [];
-const activityEvents = [];
-
 const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(Number(value || 0));
 const normalizePhone = (value) => String(value || "").replace(/\D/g, "");
 const isValidAmount = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
 const isValidPhone = (value) => /^\d{8}$/.test(normalizePhone(value));
+const merchantAccount = {
+  name: "Sahel Market",
+  number: "713034670",
+  displayNumber: "713 034 670",
+  balance: 348500,
+};
+const merchantQrPayload = `orange-money://merchant?account=${merchantAccount.number}&name=${encodeURIComponent(merchantAccount.name)}`;
+const formatAccountNumber = (value) => String(value || "").replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+const formatTransactionDate = (date) => date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+const currentMonthTransactionDate = (day, hour, minute) => {
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  return new Date(now.getFullYear(), now.getMonth(), Math.min(day, lastDay), hour, minute);
+};
+const makeCurrentMonthTransaction = ({ day, hour, minute, name, type, amount, reference, icon, tone = "success", details = {} }) => {
+  const date = currentMonthTransactionDate(day, hour, minute);
+  return {
+    id: reference,
+    name,
+    type,
+    amount: `${amount < 0 ? "−" : "+"} ${formatNumber(Math.abs(amount))}`,
+    amountValue: amount,
+    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date: formatTransactionDate(date),
+    timestamp: date.getTime(),
+    status: "Current-month history",
+    tone,
+    channel: "Merchant account",
+    reference,
+    isIllustrative: true,
+    details: { "Account number": merchantAccount.displayNumber, ...details },
+    icon,
+  };
+};
+const currentMonthHistory = [
+  makeCurrentMonthTransaction({ day: 5, hour: 9, minute: 18, name: "Mariam Ouédraogo", type: "QR payment", amount: 18500, reference: "OM-PAY-260805", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 11, hour: 13, minute: 42, name: "Issouf Kaboré", type: "Collection", amount: 42000, reference: "OM-COL-260811", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 18, hour: 15, minute: 6, name: "Airtel distribution", type: "Transfer", amount: -200000, reference: "OM-TRF-260818", icon: ArrowUpRight, tone: "neutral", details: { "Beneficiary account": "75318231" } }),
+  makeCurrentMonthTransaction({ day: 24, hour: 10, minute: 27, name: "Sahel Market", type: "Purchase payment", amount: -7500, reference: "OM-PAY-260824", icon: ShoppingCart, tone: "neutral", details: { "Payment method": "Merchant account" } }),
+  makeCurrentMonthTransaction({ day: 27, hour: 17, minute: 12, name: "Mariam Ouédraogo", type: "QR payment", amount: 27500, reference: "OM-PAY-260827", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 1, hour: 8, minute: 15, name: "Binta Traoré", type: "Collection", amount: 12500, reference: "OM-COL-260801", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 2, hour: 11, minute: 40, name: "Awa Kaboré", type: "QR payment", amount: 9800, reference: "OM-PAY-260802", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 3, hour: 14, minute: 22, name: "Ouaga Café", type: "Purchase payment", amount: -6300, reference: "OM-PAY-260803", icon: ShoppingCart, tone: "neutral", details: { "Payment method": "Merchant account" } }),
+  makeCurrentMonthTransaction({ day: 4, hour: 16, minute: 50, name: "Issa Yaméogo", type: "Collection", amount: 27500, reference: "OM-COL-260804", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 7, hour: 9, minute: 5, name: "Boutique Wendpanga", type: "QR payment", amount: 15000, reference: "OM-PAY-260807", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 8, hour: 12, minute: 18, name: "Orange distribution", type: "Transfer", amount: -85000, reference: "OM-TRF-260808", icon: ArrowUpRight, tone: "neutral", details: { "Beneficiary account": "75264018" } }),
+  makeCurrentMonthTransaction({ day: 9, hour: 10, minute: 32, name: "Fatoumata Diallo", type: "Collection", amount: 32100, reference: "OM-COL-260809", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 10, hour: 18, minute: 6, name: "Sahel Market", type: "Purchase payment", amount: -12400, reference: "OM-PAY-260810", icon: ShoppingCart, tone: "neutral", details: { "Payment method": "Merchant account" } }),
+  makeCurrentMonthTransaction({ day: 12, hour: 8, minute: 46, name: "Mariam Ouédraogo", type: "QR payment", amount: 22000, reference: "OM-PAY-260812", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 13, hour: 13, minute: 15, name: "Koudougou Supplies", type: "Collection", amount: 48750, reference: "OM-COL-260813", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 14, hour: 15, minute: 44, name: "Issouf Kaboré", type: "Transfer", amount: -120000, reference: "OM-TRF-260814", icon: ArrowUpRight, tone: "neutral", details: { "Beneficiary account": "70118452" } }),
+  makeCurrentMonthTransaction({ day: 15, hour: 9, minute: 27, name: "Bobo Fresh", type: "QR payment", amount: 7600, reference: "OM-PAY-260815", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 16, hour: 17, minute: 38, name: "Airtel distribution", type: "Transfer", amount: -65000, reference: "OM-TRF-260816", icon: ArrowUpRight, tone: "neutral", details: { "Beneficiary account": "75318231" } }),
+  makeCurrentMonthTransaction({ day: 17, hour: 11, minute: 11, name: "Nadia Sawadogo", type: "Collection", amount: 18300, reference: "OM-COL-260817", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 19, hour: 14, minute: 5, name: "Sahel Market", type: "Purchase payment", amount: -8900, reference: "OM-PAY-260819", icon: ShoppingCart, tone: "neutral", details: { "Payment method": "Merchant account" } }),
+  makeCurrentMonthTransaction({ day: 20, hour: 10, minute: 20, name: "Mariam Ouédraogo", type: "QR payment", amount: 31500, reference: "OM-PAY-260820", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 21, hour: 16, minute: 12, name: "Wend-Kuni Services", type: "Collection", amount: 26700, reference: "OM-COL-260821", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 22, hour: 9, minute: 54, name: "Awa Kaboré", type: "QR payment", amount: 11400, reference: "OM-PAY-260822", icon: QrCode, details: { "Payment method": "Merchant QR" } }),
+  makeCurrentMonthTransaction({ day: 23, hour: 12, minute: 41, name: "Issouf Kaboré", type: "Collection", amount: 52000, reference: "OM-COL-260823", icon: ArrowDownLeft, details: { "Payment method": "Merchant collection" } }),
+  makeCurrentMonthTransaction({ day: 26, hour: 18, minute: 25, name: "Orange distribution", type: "Transfer", amount: -95000, reference: "OM-TRF-260826", icon: ArrowUpRight, tone: "neutral", details: { "Beneficiary account": "75264018" } }),
+];
+const transactions = currentMonthHistory;
+const activityEvents = [];
+const mergeTransactions = (savedTransactions) => [...savedTransactions, ...currentMonthHistory].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 const persistEvent = async ({ eventType, viewId, payload = {} }) => {
   const response = await fetch("/api/events", {
     method: "POST",
@@ -45,6 +107,200 @@ const persistSetting = async (key, value) => {
   });
   if (!response.ok) throw new Error(`Setting save failed with status ${response.status}`);
   return response.json();
+};
+
+const localWorkflowConfigs = {
+  transfers: {
+    title: "Transfer funds",
+    eyebrow: "Workspace record",
+    description: "Prepare a transfer record with a review step.",
+    recordType: "Transfer",
+    icon: ArrowUpRight,
+    fields: [
+      { name: "beneficiary", label: "Beneficiary", type: "text", placeholder: "Name or phone number" },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Reference", type: "text", placeholder: "Optional reference", optional: true },
+    ],
+  },
+  qr: {
+    title: "QR payment record",
+    eyebrow: "Payment record",
+    description: "Record a QR payment for your own operations.",
+    recordType: "QR payment",
+    icon: QrCode,
+    fields: [
+      { name: "merchant", label: "Merchant or customer", type: "text", placeholder: "Name or store" },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "reference", label: "Reference", type: "text", placeholder: "Optional reference", optional: true },
+    ],
+  },
+  register: {
+    title: "Cash register entry",
+    eyebrow: "Daily operations",
+    description: "Save a cash movement entry with an auditable review step.",
+    recordType: "Register entry",
+    icon: WalletMinimal,
+    fields: [
+      { name: "movement", label: "Movement type", type: "select", options: ["Cash in", "Cash out"] },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Reason or reference", type: "text", placeholder: "Optional note", optional: true },
+    ],
+  },
+  revenue: {
+    title: "Revenue entry",
+    eyebrow: "Business performance",
+    description: "Add a revenue entry to your workspace report.",
+    recordType: "Revenue entry",
+    icon: BarChart3,
+    fields: [
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "source", label: "Revenue source", type: "text", placeholder: "e.g. Counter sale" },
+      { name: "note", label: "Reference", type: "text", placeholder: "Optional note", optional: true },
+    ],
+  },
+  verify: {
+    title: "Payment verification record",
+    eyebrow: "Payment verification",
+    description: "Record a reference you checked.",
+    recordType: "Verification",
+    icon: ScanLine,
+    fields: [
+      { name: "reference", label: "Transaction reference", type: "text", placeholder: "Enter the reference" },
+      { name: "amount", label: "Amount shown", type: "amount", placeholder: "0" },
+      { name: "note", label: "Verification note", type: "text", placeholder: "Optional note", optional: true },
+    ],
+  },
+  "orange-send-money": {
+    title: "Send money",
+    eyebrow: "Wallet record",
+    description: "Prepare a send-money record without contacting a wallet provider.",
+    recordType: "Send money",
+    icon: Send,
+    fields: [
+      { name: "phone", label: "Recipient phone number", type: "phone", placeholder: "70 00 00 00" },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Reason", type: "text", placeholder: "Optional reason", optional: true },
+    ],
+  },
+  "orange-withdraw-money": {
+    title: "Withdraw money",
+    eyebrow: "Wallet record",
+    description: "Prepare a withdrawal record without contacting a wallet provider.",
+    recordType: "Withdrawal",
+    icon: ArrowDownLeft,
+    fields: [
+      { name: "location", label: "Withdrawal point", type: "select", options: ["Ouagadougou · Patte d’Oie", "Ouagadougou · 1200 Logements", "Bobo-Dioulasso · Centre"] },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Reference", type: "text", placeholder: "Optional reference", optional: true },
+    ],
+  },
+  "orange-pay-purchases": {
+    title: "Purchase payment",
+    eyebrow: "Wallet record",
+    description: "Prepare a purchase record without charging a wallet.",
+    recordType: "Purchase payment",
+    icon: ShoppingCart,
+    fields: [
+      { name: "merchant", label: "Merchant or store", type: "text", placeholder: "e.g. Sahel Market" },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Order reference", type: "text", placeholder: "Optional reference", optional: true },
+    ],
+  },
+  "orange-buy-credit": {
+    title: "Buy credit",
+    eyebrow: "Wallet record",
+    description: "Prepare an airtime record without topping up a phone.",
+    recordType: "Airtime top up",
+    icon: Smartphone,
+    fields: [
+      { name: "phone", label: "Phone number to top up", type: "phone", placeholder: "70 00 00 00" },
+      { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+      { name: "note", label: "Bundle", type: "text", placeholder: "Optional bundle name", optional: true },
+    ],
+  },
+  "orange-virtual-card": {
+    title: "Virtual card record",
+    eyebrow: "Wallet record",
+    description: "Save a card request for reference.",
+    recordType: "Virtual card",
+    icon: CreditCard,
+    fields: [
+      { name: "nickname", label: "Card nickname", type: "text", placeholder: "e.g. Online shopping" },
+    ],
+  },
+};
+
+const serviceFields = {
+  "orange-service-loyalty": [],
+  "orange-service-manage-money": [
+    { name: "destination", label: "Destination account", type: "select", options: ["Savings account", "Primary account", "Family account"] },
+    { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+  ],
+  "orange-service-boost": [],
+  "orange-service-loans": [
+    { name: "amount", label: "Requested amount", type: "amount", placeholder: "0" },
+    { name: "term", label: "Repayment period", type: "select", options: ["7 days", "14 days", "30 days"] },
+  ],
+  "orange-service-bills": [
+    { name: "biller", label: "Bill provider", type: "select", options: ["ONEA water", "SONABEL electricity", "Canal+"] },
+    { name: "customer", label: "Customer or contract number", type: "text", placeholder: "Enter the number" },
+    { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+  ],
+  "orange-service-airtime": [
+    { name: "phone", label: "Phone number to top up", type: "phone", placeholder: "70 00 00 00" },
+    { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+  ],
+  "orange-service-data": [
+    { name: "phone", label: "Phone number to top up", type: "phone", placeholder: "70 00 00 00" },
+    { name: "bundle", label: "Choose a bundle", type: "select", options: ["500 MB · 500 FCFA", "2 GB · 2,000 FCFA", "5 GB · 5,000 FCFA"] },
+  ],
+  "orange-service-tv": [
+    { name: "provider", label: "Provider", type: "select", options: ["Canal+", "Orange Internet", "A+"] },
+    { name: "customer", label: "Subscriber number", type: "text", placeholder: "Enter the subscriber number" },
+    { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+  ],
+  "orange-service-school": [
+    { name: "student", label: "Student reference", type: "text", placeholder: "Enter the student reference" },
+    { name: "amount", label: "Amount", type: "amount", placeholder: "0" },
+  ],
+  "orange-service-insurance": [
+    { name: "plan", label: "Choose a plan", type: "select", options: ["Mobile protection", "Family cover", "Travel cover"] },
+  ],
+};
+
+const localTransactionFromEvent = (event) => {
+  const payload = event.payload || {};
+  const flowId = payload.flowId || event.view_id;
+  const config = localWorkflowConfigs[flowId];
+  const title = payload.title || config?.title || payload.service || (flowId === "deposit-local" ? "Deposit" : "Workspace record");
+  const recordType = payload.recordType || (flowId === "deposit-local" ? "Deposit" : title);
+  const isOutflow = ["Transfer", "Withdrawal", "Purchase payment", "Airtime top up"].includes(recordType) || ["transfer", "orange-send-money", "orange-withdraw-money", "orange-pay-purchases", "orange-buy-credit"].includes(flowId);
+  const amountNumber = Number(payload.amount || payload.fields?.amount || 0);
+  const storedReference = payload.reference || `LOCAL-${event.id}`;
+  const reference = storedReference.replace(/^LOCAL-/i, "REC-");
+  const timestamp = new Date(event.created_at).getTime();
+  return {
+    id: reference,
+    name: payload.beneficiary || payload.merchant || payload.phone || payload.fields?.beneficiary || title,
+    type: recordType,
+    amount: `${isOutflow ? "−" : "+"} ${formatNumber(amountNumber)}`,
+    time: new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date: formatTransactionDate(new Date(event.created_at)),
+    timestamp,
+    status: payload.status === "Saved locally" ? "Saved" : (payload.status || "Saved"),
+    tone: isOutflow ? "neutral" : "success",
+    channel: payload.channel || "Merchant workspace",
+    reference,
+    isIllustrative: false,
+    details: {
+      "Account number": formatAccountNumber(payload.accountNumber || merchantAccount.number),
+      ...(payload.source ? { "Source account": payload.source } : {}),
+      ...(payload.phone ? { "Phone number": `+226 ${payload.phone}` } : {}),
+      ...(payload.fields?.phone ? { "Phone number": `+226 ${payload.fields.phone}` } : {}),
+      ...(payload.note ? { Reference: payload.note } : {}),
+    },
+    icon: config?.icon || ReceiptText,
+  };
 };
 
 function App() {
@@ -104,7 +360,7 @@ function Sidebar({ activeView, goTo, showToast, mobileMenuOpen, setMobileMenuOpe
         </div>
           <button className="sidebar-account" onClick={() => showToast("A live merchant account is required")} aria-label="Open business account switcher">
           <div className="account-avatar">M</div>
-          <div><span>Merchant account</span><small>Not connected</small></div><ChevronDown size={16} />
+          <div><span>Merchant account</span><small>Account preview</small></div><ChevronDown size={16} />
         </button>
         <nav className="side-nav" aria-label="Main navigation">
           <p className="nav-label">Workspace</p>
@@ -114,7 +370,7 @@ function Sidebar({ activeView, goTo, showToast, mobileMenuOpen, setMobileMenuOpe
         </nav>
         <div className="sidebar-bottom">
           <button className="sidebar-link" onClick={() => goTo("profile")}><Settings2 size={18} /><span>Settings</span></button>
-          <button className="sidebar-help" onClick={() => showToast("Support center is unavailable until an account is connected")}><CircleHelp size={17} /><div><strong>Need help?</strong><span>Visit support center</span></div><ChevronRight size={15} /></button>
+          <button className="sidebar-help" onClick={() => showToast("Support center opened")}><CircleHelp size={17} /><div><strong>Need help?</strong><span>Visit support center</span></div><ChevronRight size={15} /></button>
           <div className="sidebar-footer">© 2024 Orange Money Pay <span>·</span> v2.9.1</div>
         </div>
       </aside>
@@ -141,21 +397,20 @@ function Topbar({ activeView, onMenu, profileOpen, setProfileOpen, notifications
       <div className="topbar-title"><button className="menu-trigger mobile-only" onClick={onMenu} aria-label="Open navigation"><Grid2X2 size={20} /></button><div className="mobile-topbar-brand mobile-only" aria-label="Merchant workspace"><OrangeLogo /></div>
         <div className="topbar-heading"><span className="eyebrow">Merchant workspace</span><h1>{title}</h1></div></div>
       <div className="topbar-actions">
-        <div className="connection-pill disconnected"><span className="live-dot" /> Live connection required</div>
         <button className="icon-button mobile-only" onClick={() => goTo("activity")} aria-label="Search activity"><Search size={18} /></button>
         <button className={`icon-button ${notificationsOpen ? "selected" : ""}`} onClick={() => { setNotificationsOpen((open) => !open); setProfileOpen(false); }} aria-label={`Notifications${displayedNotificationCount ? `, ${displayedNotificationCount} unread` : ""}`}><Bell size={19} />{displayedNotificationCount > 0 && <span className="notification-badge">{displayedNotificationCount}</span>}</button>
-        <button className="icon-button mobile-only" onClick={() => showToast("Help center is unavailable until an account is connected")} aria-label="Help"><CircleHelp size={18} /></button>
+        <button className="icon-button mobile-only" onClick={() => showToast("Help center opened")} aria-label="Help"><CircleHelp size={18} /></button>
         <div className="profile-wrap">
           <button className="profile-button" onClick={() => { setProfileOpen((open) => !open); setNotificationsOpen(false); }} aria-expanded={profileOpen}><span className="profile-avatar"><UserRound className="mobile-avatar-icon" size={20} /><span className="profile-initials">M</span></span><span className="profile-name">Merchant</span><ChevronDown size={15} /></button>
           {profileOpen && <div className="popover profile-popover">
-            <div className="popover-user"><div className="profile-avatar large">M</div><div><strong>Merchant profile</strong><span>Live account required</span></div></div>
+            <div className="popover-user"><div className="profile-avatar large">M</div><div><strong>Merchant profile</strong><span>Account preview</span></div></div>
             <button onClick={() => goTo("profile")}><UserRound size={16} /> My profile</button><button onClick={() => goTo("profile")}><Settings2 size={16} /> Settings</button>
-            <div className="popover-divider" /><button className="danger-text" onClick={() => { setProfileOpen(false); showToast("Sign out is unavailable until authentication is connected"); }}><LogOut size={16} /> Sign out</button>
+            <div className="popover-divider" /><button className="danger-text" onClick={() => { setProfileOpen(false); showToast("Sign out is unavailable until authentication is configured"); }}><LogOut size={16} /> Sign out</button>
           </div>}
         </div>
         {notificationsOpen && <div className="popover notification-popover">
            <div className="popover-heading"><strong>Notifications</strong></div>
-           <div className="notification-empty"><CircleHelp size={16} /><span>Live notifications will appear after an account is connected.</span></div>
+           <div className="notification-empty"><CircleHelp size={16} /><span>No new notifications.</span></div>
         </div>}
       </div>
     </header>
@@ -179,9 +434,9 @@ function ViewRenderer({ activeView, goTo, showToast, openTransaction, selectedTr
     case "orange-pay-purchases":
     case "orange-buy-credit":
     case "orange-virtual-card":
-      return <UnavailableState title="Wallet actions are unavailable" description="Send, withdraw, purchase, airtime, and virtual card actions require a connected Orange Money account." />;
-    case "orange-card-receipt": return <UnavailableState title="Receipts are unavailable" description="A receipt will appear here after a real transaction is connected." />;
-    case "services": return <UnavailableState title="Orange Money services are unavailable" description="Connect a live Orange Money account to use wallet services." />;
+      return <LocalWorkflowView flowId={activeView} goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
+    case "orange-card-receipt": return <LocalReceiptsView goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
+    case "services": return <LocalServicesView goTo={goTo} />;
     case "orange-service-loyalty":
     case "orange-service-manage-money":
     case "orange-service-boost":
@@ -192,14 +447,15 @@ function ViewRenderer({ activeView, goTo, showToast, openTransaction, selectedTr
     case "orange-service-tv":
     case "orange-service-school":
     case "orange-service-insurance":
-      return <UnavailableState title="This service is unavailable" description="Connect a live Orange Money account before using wallet services." />;
+      return <LocalWorkflowView flowId={activeView} goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
     case "collections": return <CollectionsView showToast={showToast} openTransaction={openTransaction} />;
-    case "transfers": return <UnavailableState title="Transfers are unavailable" description="Connect a live merchant account before sending funds." />;
-    case "qr": return <UnavailableState title="QR payments are unavailable" description="A live merchant account is required to create or verify payment QR codes." />;
-    case "register": return <UnavailableState title="Cash register is unavailable" description="Connect a live merchant account before opening or closing a register." />;
-    case "revenue": return <UnavailableState title="Revenue data is unavailable" description="Revenue metrics will appear after a live merchant account is connected." />;
+    case "transfers":
+    case "qr":
+    case "register":
+    case "revenue":
+      return <LocalWorkflowView flowId={activeView} goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
     case "activity": return <ActivityView showToast={showToast} openTransaction={openTransaction} />;
-    case "verify": return <UnavailableState title="Payment verification is unavailable" description="Live payment verification requires a connected merchant account." />;
+    case "verify": return <LocalWorkflowView flowId="verify" goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
     case "profile": return <ProfileView showToast={showToast} />;
     case "transaction-detail": return <TransactionDetailView transaction={selectedTransaction} goTo={goTo} showToast={showToast} />;
     default: return <Dashboard goTo={goTo} showToast={showToast} openTransaction={openTransaction} />;
@@ -207,7 +463,130 @@ function ViewRenderer({ activeView, goTo, showToast, openTransaction, selectedTr
 }
 
 function UnavailableState({ title, description, action, onAction }) {
-  return <div className="standard-view"><div className="panel empty-state unavailable-state"><span className="empty-icon"><CircleHelp size={22} /></span><span className="eyebrow">Live connection required</span><h3>{title}</h3><p>{description}</p>{action && <button className="primary-button" onClick={onAction}>{action}<ArrowRight size={15} /></button>}</div></div>;
+  return <div className="standard-view"><div className="panel empty-state unavailable-state"><span className="empty-icon"><CircleHelp size={22} /></span><span className="eyebrow">Workspace tools</span><h3>{title}</h3><p>{description}</p>{action && <button className="primary-button" onClick={onAction}>{action}<ArrowRight size={15} /></button>}</div></div>;
+}
+
+function getLocalWorkflowConfig(flowId) {
+  if (localWorkflowConfigs[flowId]) return localWorkflowConfigs[flowId];
+  const service = orangeServiceConfigs[flowId];
+  if (!service) return null;
+  return {
+    title: service.title,
+    eyebrow: service.eyebrow,
+    description: service.description,
+    recordType: "Service record",
+    icon: service.icon,
+    fields: serviceFields[flowId] || [],
+  };
+}
+
+function LocalWorkflowView({ flowId, goTo, showToast, openTransaction }) {
+  const config = getLocalWorkflowConfig(flowId);
+  const [step, setStep] = useState("form");
+  const [values, setValues] = useState({});
+  const [formMessage, setFormMessage] = useState("");
+  const [savedTransaction, setSavedTransaction] = useState(null);
+
+  if (!config) return <UnavailableState title="Workspace action unavailable" description="This action is not configured for workspace records." />;
+
+  const updateValue = (name, value) => {
+    setValues((current) => ({ ...current, [name]: value }));
+    setFormMessage("");
+  };
+  const reset = () => {
+    setStep("form");
+    setValues({});
+    setFormMessage("");
+    setSavedTransaction(null);
+  };
+  const validate = () => {
+    const missing = config.fields.find((field) => {
+      const value = String(values[field.name] || "").trim();
+      if (!value && !field.optional) return true;
+      if (field.type === "phone" && value && !isValidPhone(value)) return true;
+      if (field.type === "amount" && value && !isValidAmount(value)) return true;
+      return false;
+    });
+    if (!missing) return true;
+    if (missing.type === "phone") setFormMessage("Enter an 8-digit Burkina Faso phone number.");
+    else if (missing.type === "amount") setFormMessage("Enter an amount greater than 0.");
+    else setFormMessage(`Complete ${missing.label.toLowerCase()}.`);
+    return false;
+  };
+  const review = () => {
+    if (validate()) setStep("review");
+  };
+  const confirm = async () => {
+    setStep("saving");
+    const reference = `LOCAL-${Date.now().toString().slice(-8)}`;
+    const payload = {
+      flowId,
+      recordType: config.recordType,
+      title: config.title,
+      reference,
+      amount: values.amount || null,
+      phone: values.phone || null,
+      merchant: values.merchant || null,
+      beneficiary: values.beneficiary || null,
+      accountNumber: merchantAccount.number,
+      note: values.note || null,
+      fields: values,
+      status: "Saved locally",
+    };
+    try {
+      await persistEvent({ eventType: "local_record_saved", viewId: flowId, payload });
+      const transaction = localTransactionFromEvent({ id: reference, view_id: flowId, payload, created_at: new Date().toISOString() });
+      setSavedTransaction(transaction);
+      setStep("success");
+      showToast(`${config.title} saved to the workspace`);
+    } catch (error) {
+      console.error(error);
+      setFormMessage("This record could not be saved. Try again.");
+      setStep("review");
+    }
+  };
+  const displayValue = (field) => {
+    const value = values[field.name] || "";
+    if (field.type === "amount") return `${formatNumber(value)} FCFA`;
+    if (field.type === "phone") return `+226 ${value}`;
+    return value;
+  };
+  const Icon = config.icon || ReceiptText;
+
+  return <div className="flow-view">
+    <PageIntro eyebrow={config.eyebrow} title={config.title} description={config.description} action={<button className="soft-button" onClick={reset}><ReceiptText size={16} /> New record</button>} />
+    <FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Details", "Review", "Saved"]} />
+    {step === "saving" && <ProcessingState label="Saving workspace record" detail="Writing this record to the workspace." />}
+    {step === "success" && <div className="panel state-panel success-panel"><span className="state-symbol success-symbol"><Check size={30} /></span><span className="eyebrow">Record saved</span><h3>{config.title} is ready</h3><p>No provider was contacted and no real funds were moved.</p><div className="success-receipt"><div><span>Type</span><strong>{config.recordType}</strong></div><div><span>Status</span><strong>Saved</strong></div><div><span>Reference</span><strong>{savedTransaction?.reference}</strong></div></div><div className="review-actions"><button className="outline-button" onClick={reset}>Make another record</button><button className="primary-button" onClick={() => savedTransaction && openTransaction(savedTransaction)}><ReceiptText size={16} /> View details</button></div></div>}
+    {step === "review" && <div className="panel review-panel"><div className="review-icon orange-bg"><Icon size={24} /></div><span className="eyebrow">Review record</span><h3>Check before saving</h3><p className="review-lead">This creates a factual workspace record. It does not contact a payment provider.</p><div className="review-amount">{values.amount ? formatNumber(values.amount) : "—"} <small>{values.amount ? "FCFA" : "No amount"}</small></div><div className="detail-list">{config.fields.map((field) => <div key={field.name}><span>{field.label}</span><strong>{displayValue(field) || "Not provided"}</strong></div>)}</div>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<div className="review-actions"><button className="outline-button" onClick={() => setStep("form")}><ArrowLeft size={16} /> Edit details</button><button className="primary-button" onClick={confirm}>Save record <ArrowRight size={16} /></button></div></div>}
+    {step === "form" && <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Record details</h3></div><span className="required-note">Required fields are marked *</span></div>{config.fields.length ? config.fields.map((field) => <label className="field-label" key={field.name} htmlFor={`local-${flowId}-${field.name}`}>{field.label} {!field.optional && <span>*</span>}{field.optional && <small>Optional</small>}{field.type === "select" ? <div className="select-wrap"><select id={`local-${flowId}-${field.name}`} value={values[field.name] || ""} onChange={(event) => updateValue(field.name, event.target.value)}><option value="">Choose an option</option>{field.options.map((option) => <option key={option} value={option}>{option}</option>)}</select><ChevronDown size={16} /></div> : field.type === "amount" ? <div className="input-with-suffix"><input id={`local-${flowId}-${field.name}`} type="number" inputMode="decimal" min="1" placeholder={field.placeholder} value={values[field.name] || ""} onChange={(event) => updateValue(field.name, event.target.value)} /><span>FCFA</span></div> : field.type === "phone" ? <div className="input-with-prefix"><span>+226</span><input id={`local-${flowId}-${field.name}`} type="tel" inputMode="tel" placeholder={field.placeholder} value={values[field.name] || ""} onChange={(event) => updateValue(field.name, normalizePhone(event.target.value).slice(0, 8))} /></div> : <input id={`local-${flowId}-${field.name}`} type="text" placeholder={field.placeholder} value={values[field.name] || ""} onChange={(event) => updateValue(field.name, event.target.value)} />}</label>) : <div className="local-action-intro"><span className="info-symbol orange-bg"><Icon size={20} /></span><h3>Ready to save this record?</h3><p>Use this action to keep a clear note for your team.</p></div>}{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<button className="primary-button form-submit" onClick={review}>{config.fields.length ? "Continue to review" : "Save record"} <ArrowRight size={16} /></button><p className="secure-note"><ShieldCheck size={15} /> Stored in this workspace; no provider is contacted.</p></div><div className="panel side-info-panel"><span className="info-symbol blue-bg"><ReceiptText size={19} /></span><h3>Record details</h3><ol><li><span>1</span><div><strong>Enter details</strong><p>Add the information your team needs.</p></div></li><li><span>2</span><div><strong>Review the record</strong><p>Check the values before saving.</p></div></li><li><span>3</span><div><strong>Find it in Activity</strong><p>Saved records can be opened later.</p></div></li></ol><div className="info-callout">Saved records remain available in Activity and Receipts.</div></div></div>}
+  </div>;
+}
+
+function LocalServicesView({ goTo }) {
+  return <div className="standard-view"><PageIntro eyebrow="Workspace tools" title="Services" description="Keep service requests and notes organized in one place." /><div className="local-services-grid">{orangeServices.map(({ label, icon: Icon, route }) => <button className="local-service-card" key={label} onClick={() => goTo(route)}><span className="info-symbol orange-bg"><Icon size={20} /></span><strong>{label}</strong><small>Save a record</small><ChevronRight size={16} /></button>)}</div></div>;
+}
+
+function LocalReceiptsView({ goTo, showToast, openTransaction }) {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/events?limit=100").then((response) => {
+      if (!response.ok) throw new Error("Receipt load failed");
+      return response.json();
+    }).then((data) => {
+      if (mounted) setEvents((data.events || []).filter((event) => event.payload?.flowId));
+    }).catch((error) => {
+      console.error(error);
+      if (mounted) showToast("Receipts could not be loaded");
+    }).finally(() => {
+      if (mounted) setLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
+   const records = mergeTransactions(events.map((event) => localTransactionFromEvent(event)));
+   return <div className="standard-view"><PageIntro eyebrow="Account history" title="Receipts" description="Review and open this month’s account records." action={<button className="outline-button" onClick={() => goTo("activity")}><Clock3 size={16} /> View activity</button>} />{loading ? <ActivitySkeleton /> : records.length ? <div className="panel receipt-list">{records.map((transaction) => <button className="history-row" key={transaction.id} onClick={() => openTransaction(transaction)}><span className="history-date"><ReceiptText size={18} /></span><div><strong>{transaction.type}</strong><p>{transaction.name} · {transaction.date}</p></div><div className="history-balance"><span>Amount</span><strong>{transaction.amount} <small>FCFA</small></strong></div><span className={`status-chip ${transaction.isIllustrative ? "neutral" : "success"}`}>{transaction.isIllustrative ? "Preview" : "Saved"}</span><ChevronRight size={16} /></button>)}</div> : <div className="panel empty-state"><span className="empty-icon"><ReceiptText size={22} /></span><h3>No account history</h3><p>Complete a workspace action to create the first record.</p><button className="primary-button" onClick={() => goTo("collections")}>Create a deposit record <ArrowRight size={15} /></button></div>}</div>;
 }
 
 function PageIntro({ eyebrow, title, description, action }) {
@@ -237,7 +616,7 @@ function TransactionDetailView({ transaction, goTo, showToast }) {
     <button className="back-link" onClick={() => goTo(transaction.origin || "activity")}><ArrowLeft size={16} /> Back to {transaction.origin === "dashboard" ? "overview" : transaction.origin === "orange-card-receipt" ? "receipt" : "activity"}</button>
     <div className="transaction-detail-header"><div><span className="eyebrow">Transaction details</span><h2>{transaction.type}</h2><p>Review the complete record for this merchant activity.</p></div></div>
     <div className="transaction-detail-grid">
-      <section className="panel transaction-summary-card"><span className={`transaction-detail-icon ${transaction.tone}`}><Icon size={22} /></span><span className="eyebrow">{transaction.status}</span><h3>{transaction.name}</h3><strong className={`transaction-detail-amount ${isPositive ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small></strong><span className={`status-chip ${transaction.tone}`}>{transaction.status}</span><p className="transaction-detail-note">Live transaction information is shown after an account is connected.</p></section>
+      <section className="panel transaction-summary-card"><span className={`transaction-detail-icon ${transaction.tone}`}><Icon size={22} /></span><span className="eyebrow">{transaction.status}</span><h3>{transaction.name}</h3><strong className={`transaction-detail-amount ${isPositive ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small></strong><span className={`status-chip ${transaction.tone}`}>{transaction.status}</span></section>
       <section className="panel transaction-information"><div className="panel-header"><div><span className="eyebrow">Receipt information</span><h3>Transaction record</h3></div><ReceiptText size={20} className="heading-icon" /></div><div className="detail-list"><div><span>Reference</span><strong>{transaction.reference || transaction.id}</strong></div><div><span>Date</span><strong>{transaction.date || transaction.time}</strong></div><div><span>Channel</span><strong>{transaction.channel || "Merchant workspace"}</strong></div><div><span>Counterparty</span><strong>{transaction.name}</strong></div>{Object.entries(transaction.details || {}).map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div></section>
     </div>
   </div>;
@@ -246,27 +625,41 @@ function TransactionDetailView({ transaction, goTo, showToast }) {
 function Dashboard({ goTo, showToast, openTransaction }) {
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [localEvents, setLocalEvents] = useState([]);
   useEffect(() => {
     const timer = window.setTimeout(() => setLoading(false), 350);
     return () => window.clearTimeout(timer);
   }, []);
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/events?limit=100").then((response) => response.ok ? response.json() : Promise.reject(new Error("Dashboard records failed")))
+      .then((data) => { if (mounted) setLocalEvents((data.events || []).filter((event) => event.payload?.flowId)); })
+      .catch((error) => console.error(error));
+    return () => { mounted = false; };
+  }, []);
   if (loading) return <DashboardSkeleton />;
+  const localTransactions = localEvents.map((event) => localTransactionFromEvent(event));
+  const historyTransactions = mergeTransactions(localTransactions);
+  const deposits = localEvents.filter((event) => event.payload?.flowId === "deposit-local");
+  const depositTotal = deposits.reduce((total, event) => total + Number(event.payload?.amount || 0), 0);
+  const revenueEntries = localEvents.filter((event) => ["Revenue entry", "QR payment"].includes(event.payload?.recordType));
+  const revenueTotal = revenueEntries.reduce((total, event) => total + Number(event.payload?.amount || event.payload?.fields?.amount || 0), 0);
   return <div className="dashboard-view">
     <div className="desktop-dashboard">
-     <section className="welcome-row"><div><span className="eyebrow">Merchant overview</span><h2>Connect your account</h2><p>Live balances, transactions, and reports will appear after setup.</p></div><button className="outline-button date-button" onClick={() => showToast("A live merchant account is required")}><CalendarDays size={17} /> Today <ChevronDown size={15} /></button></section>
+     <section className="welcome-row"><div><span className="eyebrow">Merchant overview</span><h2>Track your account</h2><p>Review your balance, recent payments, and this month’s activity.</p></div><button className="outline-button date-button" onClick={() => showToast("Showing this month’s activity")}><CalendarDays size={17} /> This month <ChevronDown size={15} /></button></section>
     <section className="dashboard-grid">
-       <div className="balance-card"><div className="card-topline"><span>Primary account</span><button onClick={() => setBalanceVisible((visible) => !visible)}>{balanceVisible ? "Show balance" : "Hide balance"} <span className="eye-toggle">{balanceVisible ? "○" : "◉"}</span></button></div>
-         <div className="balance-main"><span className="balance-amount">{balanceVisible ? "—" : "••••••"} <small>FCFA</small></span><span className="balance-status"><span className="live-dot" /> Not connected</span></div>
-         <div className="balance-meta"><span>Account ending in <strong>—</strong></span><span>Awaiting connection</span></div>
+        <div className="balance-card"><div className="card-topline"><span>Primary account</span><button onClick={() => setBalanceVisible((visible) => !visible)}>{balanceVisible ? "Hide balance" : "Show balance"} <span className="eye-toggle">{balanceVisible ? "◉" : "○"}</span></button></div>
+           <div className="balance-main"><span className="balance-amount">{balanceVisible ? formatNumber(merchantAccount.balance) : "••••••"} <small>FCFA</small></span><span className="balance-status"><span className="live-dot" /> Account preview</span></div>
+           <div className="balance-meta"><span>Account number <strong>{merchantAccount.displayNumber}</strong></span><span>{historyTransactions.length} records this month</span></div>
          <div className="balance-actions"><button onClick={() => goTo("transfers")}><ArrowUpRight size={16} /> Transfer</button><button onClick={() => goTo("collections")}><ArrowDownLeft size={16} /> Deposit</button></div>
       </div>
       <div className="quick-actions-card"><div className="section-heading"><div><span className="eyebrow">Quick actions</span><h3>Move money faster</h3></div><Zap size={20} className="heading-icon" /></div>
-          <div className="quick-action-grid"><button onClick={() => goTo("collections")}><span className="action-icon orange-icon"><ArrowDownLeft size={20} /></span><strong>Deposit</strong><small>Saves to workspace</small></button><button onClick={() => goTo("transfers")}><span className="action-icon blue-icon"><ArrowUpRight size={20} /></span><strong>Transfer</strong><small>Live account required</small></button><button onClick={() => goTo("qr")}><span className="action-icon dark-icon"><QrCode size={20} /></span><strong>My QR</strong><small>Live account required</small></button></div>
+           <div className="quick-action-grid"><button onClick={() => goTo("collections")}><span className="action-icon orange-icon"><ArrowDownLeft size={20} /></span><strong>Deposit</strong><small>Saves to workspace</small></button><button onClick={() => goTo("transfers")}><span className="action-icon blue-icon"><ArrowUpRight size={20} /></span><strong>Transfer</strong><small>Record a transfer</small></button><button onClick={() => goTo("qr")}><span className="action-icon dark-icon"><QrCode size={20} /></span><strong>My QR</strong><small>Account QR code</small></button></div>
       </div>
     </section>
-      <section className="stats-row"><StatCard label="Today’s deposits" value="—" suffix="" trend="—" trendText="Live account required" icon={ArrowDownLeft} tone="green" /><StatCard label="Transactions" value="—" suffix="" trend="—" trendText="Live account required" icon={ReceiptText} tone="blue" /><StatCard label="This month’s revenue" value="—" suffix="" trend="—" trendText="Live account required" icon={BarChart3} tone="orange" /></section>
-      <section className="content-grid"><div className="panel recent-panel"><div className="panel-header"><div><span className="eyebrow">Latest activity</span><h3>Recent transactions</h3></div><button className="text-button" onClick={() => goTo("activity")}>View activity <ArrowRight size={15} /></button></div><TransactionList compact showToast={showToast} openTransaction={openTransaction} /></div>
-        <div className="panel register-summary"><div className="panel-header"><div><span className="eyebrow">Today’s operations</span><h3>Cash register</h3></div><button className="more-button" onClick={() => showToast("Cash register is unavailable until an account is connected")} aria-label="More cash register actions"><MoreHorizontal size={18} /></button></div><div className="register-status"><span className="status-check"><CircleHelp size={18} /></span><div><strong>Not connected</strong><p>Live register data will appear after setup.</p></div></div><div className="register-total"><span>Current cash balance</span><strong>— <small>FCFA</small></strong></div><div className="register-breakdown"><div><span>Opening balance</span><strong>—</strong></div><div><span>Cash sales</span><strong>—</strong></div></div><button className="wide-outline-button" onClick={() => goTo("register")}>Open cash register <ArrowRight size={15} /></button></div>
+      <section className="stats-row"><StatCard label="Deposits" value={formatNumber(depositTotal)} suffix="FCFA" trend={deposits.length ? `${deposits.length}` : "0"} trendText="saved records" icon={ArrowDownLeft} tone="green" /><StatCard label="Records" value={formatNumber(localTransactions.length)} suffix="" trend={localTransactions.length ? "Active" : "0"} trendText="in this workspace" icon={ReceiptText} tone="blue" /><StatCard label="Revenue entries" value={formatNumber(revenueTotal)} suffix="FCFA" trend={revenueEntries.length ? `${revenueEntries.length}` : "0"} trendText="saved records" icon={BarChart3} tone="orange" /></section>
+       <section className="content-grid"><div className="panel recent-panel"><div className="panel-header"><div><span className="eyebrow">Latest activity</span><h3>Recent account history</h3></div><button className="text-button" onClick={() => goTo("activity")}>View activity <ArrowRight size={15} /></button></div><TransactionList items={historyTransactions.slice(0, 5)} compact showToast={showToast} openTransaction={openTransaction} /></div>
+         <div className="panel register-summary"><div className="panel-header"><div><span className="eyebrow">Account snapshot</span><h3>Activity this month</h3></div><button className="more-button" onClick={() => goTo("activity")} aria-label="View account activity"><MoreHorizontal size={18} /></button></div><div className="register-status"><span className="status-check"><Check size={18} /></span><div><strong>{historyTransactions.length} recorded transactions</strong><p>Payments and transfers are listed in Activity.</p></div></div><div className="register-total"><span>Current account balance</span><strong>{formatNumber(merchantAccount.balance)} <small>FCFA</small></strong></div><div className="register-breakdown"><div><span>Account number</span><strong>{merchantAccount.displayNumber}</strong></div><div><span>Illustrative entries</span><strong>{currentMonthHistory.length}</strong></div></div><button className="wide-outline-button" onClick={() => goTo("activity")}>Open account history <ArrowRight size={15} /></button></div>
     </section>
     </div>
     <MobileDashboard goTo={goTo} showToast={showToast} />
@@ -275,20 +668,20 @@ function Dashboard({ goTo, showToast, openTransaction }) {
 
 function MobileDashboard({ goTo, showToast }) {
   return <div className="mobile-dashboard">
-    <section className="mobile-greeting"><span>Merchant workspace</span><strong>Connect your account</strong></section>
+    <section className="mobile-greeting"><span>Merchant workspace</span><strong>Track your account</strong></section>
     <div className="mobile-balance-card">
-      <button className="mobile-qr-thumb" onClick={() => goTo("qr")} aria-label="Open QR payments"><CircleHelp size={34} /></button>
-      <div className="mobile-balance-copy"><span className="mobile-balance-label"><span className="mobile-mini-mark" /> Primary balance</span><span className="mobile-balance-value">— FCFA</span><span className="mobile-transactions">Live balance unavailable</span></div>
-      <span className="mobile-qr-caption">Live account required</span>
+      <button className="mobile-qr-thumb" onClick={() => goTo("qr")} aria-label={`Open QR payments for account ${merchantAccount.displayNumber}`}><QrGraphic payload={merchantQrPayload} /><div className="qr-center-mark orange-qr-center"><OrangeQrLogo /></div></button>
+      <div className="mobile-balance-copy"><span className="mobile-balance-label"><span className="mobile-mini-mark" /> Account preview</span><span className="mobile-balance-value">{formatNumber(merchantAccount.balance)} FCFA</span><span className="mobile-transactions" onClick={() => goTo("activity")}>{currentMonthHistory.length} illustrative transactions <ChevronRight size={13} /></span></div>
+      <span className="mobile-qr-caption">Account QR</span>
     </div>
-     <button className="mobile-credit-row" onClick={() => goTo("orange-buy-credit")}><span>Credit</span><span className="mobile-credit-value">Not connected</span><ChevronRight size={18} /></button>
+     <button className="mobile-credit-row" onClick={() => goTo("activity")}><span>Account</span><span className="mobile-credit-value">{merchantAccount.displayNumber}</span><ChevronRight size={18} /></button>
     <section className="mobile-shortcuts" aria-label="Quick actions">
       <button onClick={() => goTo("collections")}><span className="mobile-shortcut-icon"><ArrowDownLeft size={20} /></span><span>Deposit</span></button>
        <button onClick={() => goTo("transfers")}><span className="mobile-shortcut-icon"><ArrowUpRight size={20} /></span><span>Transfer</span></button>
        <button onClick={() => goTo("orange-service-bills")}><span className="mobile-shortcut-icon"><ReceiptText size={20} /></span><span>Pay bills</span></button>
        <button onClick={() => goTo("orange-service-airtime")}><span className="mobile-shortcut-icon"><Smartphone size={20} /></span><span>Airtime</span></button>
     </section>
-    <UnavailableState title="Offers are unavailable" description="Live account services and offers will appear after Orange Money is connected." />
+      <section className="mobile-offers panel"><span className="eyebrow">This month</span><h3>Account activity</h3><p>{currentMonthHistory.length} illustrative transactions are available in Activity.</p><button className="text-button" onClick={() => goTo("activity")}>View activity <ArrowRight size={15} /></button></section>
   </div>;
 }
 
@@ -370,7 +763,7 @@ const orangeServiceConfigs = {
   },
   "orange-service-data": {
     title: "Data bundles",
-    eyebrow: "Stay connected",
+    eyebrow: "Choose your bundle",
     description: "Choose a data bundle and top up an Orange number instantly.",
     icon: Smartphone,
     action: "Review bundle",
@@ -532,13 +925,13 @@ function MobileOrangeMoneyFlowPage({ flowId, goTo, showToast }) {
   return <div className="mobile-orange-flow-page">
     <div className="mobile-flow-header"><button onClick={() => goTo("orange-money")}><ArrowLeft size={18} /> Orange Money</button><OrangeQrLogo /></div>
     <section className="mobile-flow-title"><span className={`mobile-flow-icon flow-icon-${config.visual}`}><MobileMoneyFavoriteArt type={config.visual} /></span><div><span>{config.eyebrow}</span><h1>{config.title}</h1><p>{config.description}</p></div></section>
-    <div className="mobile-flow-balance"><span><OrangeQrLogo /> Primary balance</span><strong>286,450 <small>FCFA</small></strong></div>
-       {step === "success" ? <MobileMoneyFlowSuccess config={config} amount={amount} phone={phone} merchant={merchant} reset={reset} goTo={goTo} /> : step === "review" ? <section className="mobile-flow-card"><div className="mobile-flow-card-heading"><span>Review details</span><strong>Check before confirming</strong></div><div className="mobile-flow-summary">{config.phoneLabel && <div><span>{config.phoneLabel}</span><strong>+226 {phone}</strong></div>}{config.merchantLabel && <div><span>{config.merchantLabel}</span><strong>{merchant}</strong></div>}{flowId === "orange-withdraw-money" && <div><span>Withdrawal point</span><strong>{location}</strong></div>}<div><span>Amount</span><strong>{formatNumber(amount)} FCFA</strong></div>{note && <div><span>{config.noteLabel}</span><strong>{note}</strong></div>}</div><div className="mobile-flow-actions"><button className="mobile-flow-secondary" onClick={() => setStep("form")}><ArrowLeft size={16} /> Edit</button><button className="mobile-flow-primary" onClick={confirm}>Confirm {config.title.toLowerCase()} <ArrowRight size={16} /></button></div></section> : <section className="mobile-flow-card"><div className="mobile-flow-card-heading"><span>Enter details</span><strong>Step 1 of 2</strong></div>{!isCard && <label className="mobile-flow-field">Amount <em>*</em><div className={`mobile-flow-input-suffix ${formMessage && !isValidAmount(amount) ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} /><span>FCFA</span></div></label>}{config.phoneLabel && <label className="mobile-flow-field">{config.phoneLabel} <em>*</em><div className="mobile-flow-input-prefix"><span>+226</span><input type="tel" inputMode="tel" placeholder={config.phonePlaceholder} value={phone} onChange={(event) => { setPhone(normalizePhone(event.target.value).slice(0, 8)); setFormMessage(""); }} /></div></label>}{config.merchantLabel && <label className="mobile-flow-field">{config.merchantLabel} <em>*</em><input type="text" placeholder={config.merchantPlaceholder} value={merchant} onChange={(event) => { setMerchant(event.target.value); setFormMessage(""); }} /></label>}{flowId === "orange-withdraw-money" && <label className="mobile-flow-field">{config.selectLabel}<select value={location} onChange={(event) => setLocation(event.target.value)}><option>Ouagadougou · Patte d’Oie</option><option>Ouagadougou · 1200 Logements</option><option>Bobo-Dioulasso · Centre</option></select></label>}<label className="mobile-flow-field">{config.noteLabel} <small>Optional</small><input type="text" placeholder={config.notePlaceholder} value={note} onChange={(event) => setNote(event.target.value)} /></label>{formMessage && <p className="mobile-flow-error" role="alert">{formMessage}</p>}<button className="mobile-flow-primary mobile-flow-submit" onClick={handleContinue}>{config.primary} <ArrowRight size={16} /></button><p className="mobile-flow-secure"><ShieldCheck size={15} /> Provider connection required before money can move.</p></section>}
+    <div className="mobile-flow-balance"><span><OrangeQrLogo /> Account preview</span><strong>{formatNumber(merchantAccount.balance)} <small>FCFA</small></strong></div>
+        {step === "success" ? <MobileMoneyFlowSuccess config={config} amount={amount} phone={phone} merchant={merchant} reset={reset} goTo={goTo} /> : step === "review" ? <section className="mobile-flow-card"><div className="mobile-flow-card-heading"><span>Review details</span><strong>Check before confirming</strong></div><div className="mobile-flow-summary">{config.phoneLabel && <div><span>{config.phoneLabel}</span><strong>+226 {phone}</strong></div>}{config.merchantLabel && <div><span>{config.merchantLabel}</span><strong>{merchant}</strong></div>}{flowId === "orange-withdraw-money" && <div><span>Withdrawal point</span><strong>{location}</strong></div>}<div><span>Amount</span><strong>{formatNumber(amount)} FCFA</strong></div>{note && <div><span>{config.noteLabel}</span><strong>{note}</strong></div>}</div><div className="mobile-flow-actions"><button className="mobile-flow-secondary" onClick={() => setStep("form")}><ArrowLeft size={16} /> Edit</button><button className="mobile-flow-primary" onClick={confirm}>Confirm {config.title.toLowerCase()} <ArrowRight size={16} /></button></div></section> : <section className="mobile-flow-card"><div className="mobile-flow-card-heading"><span>Enter details</span><strong>Step 1 of 2</strong></div>{!isCard && <label className="mobile-flow-field">Amount <em>*</em><div className={`mobile-flow-input-suffix ${formMessage && !isValidAmount(amount) ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} /><span>FCFA</span></div></label>}{config.phoneLabel && <label className="mobile-flow-field">{config.phoneLabel} <em>*</em><div className="mobile-flow-input-prefix"><span>+226</span><input type="tel" inputMode="tel" placeholder={config.phonePlaceholder} value={phone} onChange={(event) => { setPhone(normalizePhone(event.target.value).slice(0, 8)); setFormMessage(""); }} /></div></label>}{config.merchantLabel && <label className="mobile-flow-field">{config.merchantLabel} <em>*</em><input type="text" placeholder={config.merchantPlaceholder} value={merchant} onChange={(event) => { setMerchant(event.target.value); setFormMessage(""); }} /></label>}{flowId === "orange-withdraw-money" && <label className="mobile-flow-field">{config.selectLabel}<select value={location} onChange={(event) => setLocation(event.target.value)}><option>Ouagadougou · Patte d’Oie</option><option>Ouagadougou · 1200 Logements</option><option>Bobo-Dioulasso · Centre</option></select></label>}<label className="mobile-flow-field">{config.noteLabel} <small>Optional</small><input type="text" placeholder={config.notePlaceholder} value={note} onChange={(event) => setNote(event.target.value)} /></label>{formMessage && <p className="mobile-flow-error" role="alert">{formMessage}</p>}<button className="mobile-flow-primary mobile-flow-submit" onClick={handleContinue}>{config.primary} <ArrowRight size={16} /></button><p className="mobile-flow-secure"><ShieldCheck size={15} /> Saved records stay in this workspace.</p></section>}
   </div>;
 }
 
 function MobileMoneyFlowSuccess({ config, amount, phone, merchant, reset, goTo }) {
-  return <section className="mobile-flow-success"><span className="mobile-flow-success-icon"><Check size={26} /></span><span className="eyebrow">Action complete</span><h2>{config.title} ready</h2><p>{config.title === "Virtual card" ? "Your virtual card is ready to view in the workspace." : `${formatNumber(amount)} FCFA is ready for this workspace action: ${config.title.toLowerCase()}.`}</p><div className="mobile-flow-success-detail">{phone && <span><small>Number</small><strong>+226 {phone}</strong></span>}{merchant && <span><small>Merchant</small><strong>{merchant}</strong></span>}<span><small>Status</small><strong>Saved</strong></span></div><button className="mobile-flow-primary" onClick={() => { reset(); goTo("orange-money"); }}>Back to Orange Money <ArrowRight size={16} /></button></section>;
+  return <section className="mobile-flow-success"><span className="mobile-flow-success-icon"><Check size={26} /></span><span className="eyebrow">Record saved</span><h2>{config.title} is ready</h2><p>{config.title === "Virtual card" ? "Your card request is ready to view in the workspace." : `${formatNumber(amount)} FCFA is saved as a workspace record for ${config.title.toLowerCase()}.`}</p><div className="mobile-flow-success-detail">{phone && <span><small>Number</small><strong>+226 {phone}</strong></span>}{merchant && <span><small>Merchant</small><strong>{merchant}</strong></span>}<span><small>Status</small><strong>Saved</strong></span></div><button className="mobile-flow-primary" onClick={() => { reset(); goTo("orange-money"); }}>Back to Orange Money <ArrowRight size={16} /></button></section>;
 }
 
 function OrangeMoneyServicesView({ goTo, showToast }) {
@@ -556,7 +949,7 @@ function MobileOrangeVirtualCardPage({ goTo, showToast }) {
     <section className="mobile-card-page-title"><div><span>Orange Money</span><h1>Virtual card</h1></div><Search size={22} /></section>
     <section className="prepaid-card-visual">
       <div className="prepaid-card-top"><span className="prepaid-card-brand"><OrangeQrLogo /><strong>Orange Money</strong></span><span className="prepaid-card-access"><span>◇</span> access</span></div>
-      <div className="prepaid-card-balance"><span>Card balance</span><strong>{balanceVisible ? "286,450" : "••••••••"} <small>FCFA</small></strong></div>
+      <div className="prepaid-card-balance"><span>Card balance</span><strong>{balanceVisible ? formatNumber(merchantAccount.balance) : "••••••••"} <small>FCFA</small></strong></div>
       <span className="prepaid-card-rainbow" />
       <div className="prepaid-card-bottom"><span>••••</span><span>••••</span><span>••••</span><span>••••</span><span>••••••••••••</span><span>CVC •••</span><span className="mastercard-circles"><i /><i /></span></div>
       <button className="prepaid-card-eye" onClick={() => setBalanceVisible((visible) => !visible)} aria-label={balanceVisible ? "Hide card balance" : "Show card balance"}><Eye size={17} /></button>
@@ -623,7 +1016,7 @@ function MobileOrangeMoneyServicesPage({ goTo, showToast }) {
   return <div className="mobile-orange-services-page">
     <div className="mobile-flow-header"><button onClick={() => goTo("orange-money")}><ArrowLeft size={18} /> Orange Money</button><OrangeQrLogo /></div>
     <section className="mobile-flow-title services-title"><span className="mobile-flow-icon flow-icon-services"><Zap size={24} /></span><div><span>Orange Money</span><h1>Services</h1><p>Everything you need, in one place.</p></div></section>
-    <div className="mobile-flow-balance"><span><OrangeQrLogo /> Primary balance</span><strong>286,450 <small>FCFA</small></strong></div>
+     <div className="mobile-flow-balance"><span><OrangeQrLogo /> Account balance</span><strong>{formatNumber(merchantAccount.balance)} <small>FCFA</small></strong></div>
     <div className="mobile-services-all-grid">{orangeServices.map(({ label, icon: Icon, route, message }) => <button key={label} onClick={() => route ? goTo(route) : showToast(message)}><span className={`mobile-money-service-icon service-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`}><Icon size={25} /></span><strong>{label}</strong><ChevronRight size={15} /></button>)}</div>
   </div>;
 }
@@ -683,13 +1076,13 @@ function OrangeMoneyServiceDetailView({ serviceId, goTo, showToast }) {
       <span className="mobile-flow-icon flow-icon-services"><Icon size={26} /></span>
       <div><span>{config.eyebrow}</span><h1>{config.title}</h1><p>{config.description}</p></div>
     </section>
-    <div className="mobile-flow-balance"><span><OrangeQrLogo /> Primary balance</span><strong>286,450 <small>FCFA</small></strong></div>
+    <div className="mobile-flow-balance"><span><OrangeQrLogo /> Account balance</span><strong>{formatNumber(merchantAccount.balance)} <small>FCFA</small></strong></div>
     {step === "success" ? <section className="mobile-flow-success">
       <span className="mobile-flow-success-icon"><Check size={26} /></span>
-       <span className="eyebrow">Action complete</span>
+       <span className="eyebrow">Record saved</span>
       <h2>{config.title} ready</h2>
       <p>{config.success}</p>
-      <div className="mobile-flow-success-detail"><span><small>Service</small><strong>{config.title}</strong></span><span><small>Status</small><strong>Completed</strong></span></div>
+        <div className="mobile-flow-success-detail"><span><small>Service</small><strong>{config.title}</strong></span><span><small>Status</small><strong>Saved</strong></span></div>
       <button className="mobile-flow-primary" onClick={() => { reset(); goTo("services"); }}>Back to Services <ArrowRight size={16} /></button>
     </section> : step === "review" ? <section className="mobile-flow-card">
       <div className="mobile-flow-card-heading"><span>Review details</span><strong>Check before confirming</strong></div>
@@ -704,13 +1097,13 @@ function OrangeMoneyServiceDetailView({ serviceId, goTo, showToast }) {
       </label>)}
       {formMessage && <p className="mobile-flow-error" role="alert">{formMessage}</p>}
       <button className="mobile-flow-primary mobile-flow-submit" onClick={handleContinue}>{config.action} <ArrowRight size={16} /></button>
-       <p className="mobile-flow-secure"><ShieldCheck size={15} /> Provider connection required before money can move.</p>
+       <p className="mobile-flow-secure"><ShieldCheck size={15} /> Saved records stay in this workspace.</p>
     </section>}
   </div>;
 }
 
 function MobileOrangeMoneyPage({ goTo }) {
-  return <div className="mobile-orange-money-page"><div className="panel empty-state unavailable-state"><span className="empty-icon"><CircleHelp size={22} /></span><span className="eyebrow">Live connection required</span><h3>Orange Money wallet is unavailable</h3><p>Connect a live Orange Money account to view balances and wallet actions.</p><button className="primary-button" onClick={() => goTo("collections")}>Open deposit <ArrowRight size={15} /></button></div></div>;
+  return <div className="mobile-orange-money-page"><section className="panel local-wallet-home"><span className="eyebrow">Wallet workspace</span><h2>Keep wallet actions organized</h2><p>Save account action records here and review them in Activity.</p><div className="local-wallet-actions"><button className="primary-button" onClick={() => goTo("collections")}><ArrowDownLeft size={16} /> Create deposit</button><button className="outline-button" onClick={() => goTo("orange-send-money")}><ArrowUpRight size={16} /> Prepare transfer</button><button className="outline-button" onClick={() => goTo("services")}><Zap size={16} /> Open services</button><button className="outline-button" onClick={() => goTo("orange-card-receipt")}><ReceiptText size={16} /> View receipts</button></div><div className="local-wallet-status"><span className="live-dot" /> Account preview · {merchantAccount.displayNumber}</div></section></div>;
 }
 
 function OrangeLogo() {
@@ -733,9 +1126,9 @@ function StatCard({ label, value, suffix, trend, trendText, icon: Icon, tone }) 
   return <div className="stat-card"><div className={`stat-icon ${tone}-icon`}><Icon size={18} /></div><div className="stat-copy"><span>{label}</span><strong>{value} <small>{suffix}</small></strong><p><b className={tone === "orange" ? "orange-text" : "green-text"}>{trend}</b> {trendText}</p></div></div>;
 }
 
-function TransactionList({ showToast, openTransaction }) {
-  if (!transactions.length) return <div className="empty-state compact-empty"><span className="empty-icon"><ReceiptText size={20} /></span><h3>No live transactions</h3><p>Transactions will appear after a merchant account is connected.</p></div>;
-  return <div className="transaction-list">{transactions.map((transaction) => { const Icon = transaction.icon; return <button className="transaction-row" key={transaction.id} onClick={() => openTransaction ? openTransaction(transaction) : showToast(`Opened ${transaction.id}`)}><span className={`transaction-icon ${transaction.tone}`}><Icon size={16} /></span><span className="transaction-copy"><strong>{transaction.name}</strong><small>{transaction.type} <span>·</span> {transaction.time}</small></span><span className={`transaction-amount ${transaction.amount.startsWith("+") ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small><em className={`status-chip ${transaction.tone}`}>{transaction.status}</em></span><ChevronRight size={16} className="row-chevron" /></button>; })}</div>;
+function TransactionList({ items = transactions, showToast, openTransaction }) {
+  if (!items.length) return <div className="empty-state compact-empty"><span className="empty-icon"><ReceiptText size={20} /></span><h3>No records yet</h3><p>Complete a workspace action to see its record here.</p></div>;
+  return <div className="transaction-list">{items.map((transaction) => { const Icon = transaction.icon; return <button className="transaction-row" key={transaction.id} onClick={() => openTransaction ? openTransaction(transaction) : showToast(`Opened ${transaction.id}`)}><span className={`transaction-icon ${transaction.tone}`}><Icon size={16} /></span><span className="transaction-copy"><strong>{transaction.name}</strong><small>{transaction.type} <span>·</span> {transaction.time}</small></span><span className={`transaction-amount ${transaction.amount.startsWith("+") ? "positive" : ""}`}>{transaction.amount} <small>FCFA</small><em className={`status-chip ${transaction.tone}`}>{transaction.status}</em></span><ChevronRight size={16} className="row-chevron" /></button>; })}</div>;
 }
 
 function CollectionsView({ showToast, openTransaction }) {
@@ -744,9 +1137,10 @@ function CollectionsView({ showToast, openTransaction }) {
   const [customer, setCustomer] = useState("");
   const [note, setNote] = useState("");
   const [formMessage, setFormMessage] = useState("");
+  const [savedTransaction, setSavedTransaction] = useState(null);
   const amountInvalid = amount !== "" && !isValidAmount(amount);
   const customerInvalid = customer !== "" && !isValidPhone(customer);
-  const reset = () => { setStep("form"); setAmount(""); setCustomer(""); setNote(""); setFormMessage(""); };
+  const reset = () => { setStep("form"); setAmount(""); setCustomer(""); setNote(""); setFormMessage(""); setSavedTransaction(null); };
   const handleContinue = () => {
     if (!isValidAmount(amount)) {
       setFormMessage("Enter an amount greater than 0.");
@@ -759,11 +1153,26 @@ function CollectionsView({ showToast, openTransaction }) {
     setFormMessage("");
     setStep("review");
   };
-  if (step === "success") return <SuccessState type="collection" amount={amount} customer={customer || "Customer"} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
+  const saveDeposit = async () => {
+    setStep("processing");
+    const reference = `LOCAL-${Date.now().toString().slice(-8)}`;
+    const payload = { flowId: "deposit-local", recordType: "Deposit", title: "Deposit funds", reference, amount, phone: customer, accountNumber: merchantAccount.number, note: note || null, status: "Saved locally" };
+    try {
+      const result = await persistEvent({ eventType: "local_record_saved", viewId: "collections", payload });
+      setSavedTransaction(localTransactionFromEvent(result.event));
+      setStep("success");
+      showToast("Deposit saved");
+    } catch (error) {
+      console.error(error);
+      setFormMessage("This deposit could not be saved. Try again.");
+      setStep("review");
+    }
+  };
+  if (step === "success") return <SuccessState transaction={savedTransaction} type="collection" amount={amount} customer={customer || "Customer"} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
   return <div className="flow-view">
-    <PageIntro eyebrow="Deposit" title="Deposit funds" description="Save a deposit record to this workspace while a live merchant account is being connected." action={<button className="soft-button" onClick={reset}><ReceiptText size={16} /> New deposit</button>} />
+     <PageIntro eyebrow="Deposit" title="Deposit funds" description="Save a deposit record to this workspace." action={<button className="soft-button" onClick={reset}><ReceiptText size={16} /> New deposit</button>} />
     <FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Payment details", "Review", "Complete"]} />
-     {step === "processing" ? <ProcessingState label="Saving deposit" detail="Writing this deposit record to the workspace." /> : step === "review" ? <CollectionReview amount={amount} customer={customer} note={note} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => { setStep("success"); showToast("Deposit saved", { type: "transaction_completed", payload: { flowId: "deposit-local", amount, phone: customer, note: note || null } }); }, 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Deposit details</h3></div><span className="required-note">All fields marked * are required</span></div><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><label className="field-label">Customer phone number <span>*</span><div className={`input-with-prefix ${customerInvalid ? "has-error" : ""}`}><span>+226</span><input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="70 00 00 00" value={customer} onChange={(event) => { setCustomer(event.target.value); setFormMessage(""); }} aria-invalid={customerInvalid} /></div>{customerInvalid && <small className="field-error">Use 8 digits, for example 70 00 00 00.</small>}</label><label className="field-label">Reference <small>Optional</small><input type="text" placeholder="e.g. Deposit reference" value={note} onChange={(event) => setNote(event.target.value)} /></label><button className="primary-button form-submit" disabled={!amount || !customer} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><ShieldCheck size={15} /> Saves a local record; no provider is contacted.</p></div><div className="panel side-info-panel"><span className="info-symbol"><Smartphone size={19} /></span><h3>About this flow</h3><ol><li><span>1</span><div><strong>Enter the amount</strong><p>Set the amount for the workspace record.</p></div></li><li><span>2</span><div><strong>Review the details</strong><p>Check the deposit information before saving.</p></div></li><li><span>3</span><div><strong>Save the record</strong><p>The entry is stored in the workspace.</p></div></li></ol><div className="info-callout">Deposits are available while live account features are being connected.</div></div></div>}
+       {step === "processing" ? <ProcessingState label="Saving deposit" detail="Writing this deposit record to the workspace." /> : step === "review" ? <CollectionReview amount={amount} customer={customer} note={note} onBack={() => setStep("form")} onConfirm={saveDeposit} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Deposit details</h3></div><span className="required-note">All fields marked * are required</span></div><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><label className="field-label">Customer phone number <span>*</span><div className={`input-with-prefix ${customerInvalid ? "has-error" : ""}`}><span>+226</span><input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="70 00 00 00" value={customer} onChange={(event) => { setCustomer(event.target.value); setFormMessage(""); }} aria-invalid={customerInvalid} /></div>{customerInvalid && <small className="field-error">Use 8 digits, for example 70 00 00 00.</small>}</label><label className="field-label">Reference <small>Optional</small><input type="text" placeholder="e.g. Deposit reference" value={note} onChange={(event) => setNote(event.target.value)} /></label><button className="primary-button form-submit" disabled={!amount || !customer} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><ShieldCheck size={15} /> Saves a record; no provider is contacted.</p></div><div className="panel side-info-panel"><span className="info-symbol"><Smartphone size={19} /></span><h3>About this flow</h3><ol><li><span>1</span><div><strong>Enter the amount</strong><p>Add the information your team needs.</p></div></li><li><span>2</span><div><strong>Review the details</strong><p>Check the deposit information before saving.</p></div></li><li><span>3</span><div><strong>Save the record</strong><p>The entry is stored in the workspace.</p></div></li></ol><div className="info-callout">Saved deposits remain available in Activity and Receipts.</div></div></div>}
   </div>;
 }
 
@@ -775,10 +1184,11 @@ function TransfersView({ showToast, openTransaction }) {
   const [step, setStep] = useState("form");
   const [amount, setAmount] = useState("");
   const [beneficiary, setBeneficiary] = useState("Airtel distribution");
-  const [source, setSource] = useState("Main account · 286,450 FCFA");
+  const [source, setSource] = useState(`Main account · ${formatNumber(merchantAccount.balance)} FCFA`);
   const [formMessage, setFormMessage] = useState("");
+  const [savedTransaction, setSavedTransaction] = useState(null);
   const amountInvalid = amount !== "" && !isValidAmount(amount);
-  const reset = () => { setStep("form"); setAmount(""); setFormMessage(""); };
+  const reset = () => { setStep("form"); setAmount(""); setFormMessage(""); setSavedTransaction(null); };
   const handleContinue = () => {
     if (!isValidAmount(amount)) {
       setFormMessage("Enter an amount greater than 0.");
@@ -787,8 +1197,23 @@ function TransfersView({ showToast, openTransaction }) {
     setFormMessage("");
     setStep("review");
   };
-  if (step === "success") return <SuccessState type="transfer" amount={amount} customer={beneficiary} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
-  return <div className="flow-view"><PageIntro eyebrow="Money movement" title="Transfer funds" description="Send money from your merchant accounts to a beneficiary." action={<button className="soft-button" onClick={() => showToast("Transfer history opened")}><BookOpen size={16} /> Transfer history</button>} /><FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Transfer details", "Review", "Complete"]} />{step === "processing" ? <ProcessingState label="Processing transfer" detail="This usually takes a few seconds." /> : step === "review" ? <TransferReview amount={amount} beneficiary={beneficiary} source={source} onBack={() => setStep("form")} onConfirm={() => { setStep("processing"); window.setTimeout(() => { setStep("success"); showToast("Transfer saved", { type: "transaction_completed", payload: { flowId: "transfer", amount, beneficiary, source, fee: 100 } }); }, 1300); }} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Transfer details</h3></div></div><label className="field-label">From account <span>*</span><div className="select-wrap"><WalletCards size={17} /><select value={source} onChange={(event) => setSource(event.target.value)}><option>Main account · 286,450 FCFA</option><option>Settlement account · 814,200 FCFA</option></select><ChevronDown size={16} /></div></label><label className="field-label">Beneficiary <span>*</span><div className="select-wrap"><UsersRound size={17} /><select value={beneficiary} onChange={(event) => setBeneficiary(event.target.value)}><option>Airtel distribution</option><option>Issouf Kaboré · +226 70 82 11 04</option><option>New beneficiary</option></select><ChevronDown size={16} /></div></label><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><button className="primary-button form-submit" disabled={!amount} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><LockKeyhole size={15} /> Transfers are protected by merchant verification.</p></div><div className="panel side-info-panel transfer-side"><span className="info-symbol blue-bg"><ArrowUpRight size={19} /></span><h3>Transfer safely</h3><p>Choose the right account before sending funds. You can review the recipient and fees before confirming.</p><div className="limit-card"><span>Daily transfer limit</span><strong>2,000,000 FCFA</strong><div className="limit-bar"><span /></div><small>1,714,000 FCFA remaining today</small></div></div></div>}</div>;
+  const saveTransfer = async () => {
+    setStep("processing");
+    const reference = `LOCAL-${Date.now().toString().slice(-8)}`;
+    const payload = { flowId: "transfers", recordType: "Transfer", title: "Transfer funds", reference, amount, beneficiary, source, accountNumber: merchantAccount.number, fee: 100, status: "Saved locally" };
+    try {
+      const result = await persistEvent({ eventType: "local_record_saved", viewId: "transfers", payload });
+      setSavedTransaction(localTransactionFromEvent(result.event));
+      setStep("success");
+      showToast("Transfer saved");
+    } catch (error) {
+      console.error(error);
+      setFormMessage("This transfer could not be saved. Try again.");
+      setStep("review");
+    }
+  };
+  if (step === "success") return <SuccessState transaction={savedTransaction} type="transfer" amount={amount} customer={beneficiary} reset={reset} showToast={showToast} openTransaction={openTransaction} />;
+  return <div className="flow-view"><PageIntro eyebrow="Money movement" title="Transfer funds" description="Send money from your merchant accounts to a beneficiary." action={<button className="soft-button" onClick={() => showToast("Transfer history opened")}><BookOpen size={16} /> Transfer history</button>} /><FlowSteps active={step === "form" ? 0 : step === "review" ? 1 : 2} labels={["Transfer details", "Review", "Complete"]} />{step === "processing" ? <ProcessingState label="Processing transfer" detail="This usually takes a few seconds." /> : step === "review" ? <TransferReview amount={amount} beneficiary={beneficiary} source={source} onBack={() => setStep("form")} onConfirm={saveTransfer} /> : <div className="flow-grid"><div className="panel form-panel"><div className="panel-header"><div><span className="eyebrow">Step 1 of 2</span><h3>Transfer details</h3></div></div><label className="field-label">From account <span>*</span><div className="select-wrap"><WalletCards size={17} /><select value={source} onChange={(event) => setSource(event.target.value)}><option>{`Main account · ${formatNumber(merchantAccount.balance)} FCFA`}</option><option>Settlement account · 814,200 FCFA</option></select><ChevronDown size={16} /></div></label><label className="field-label">Beneficiary <span>*</span><div className="select-wrap"><UsersRound size={17} /><select value={beneficiary} onChange={(event) => setBeneficiary(event.target.value)}><option>Airtel distribution</option><option>Issouf Kaboré · +226 70 82 11 04</option><option>New beneficiary</option></select><ChevronDown size={16} /></div></label><label className="field-label">Amount <span>*</span><div className={`input-with-suffix ${amountInvalid ? "has-error" : ""}`}><input type="number" inputMode="decimal" placeholder="0" value={amount} onChange={(event) => { setAmount(event.target.value); setFormMessage(""); }} min="1" aria-invalid={amountInvalid} /><span>FCFA</span></div>{amountInvalid && <small className="field-error">Amount must be greater than 0.</small>}</label><button className="primary-button form-submit" disabled={!amount} onClick={handleContinue}>Continue to review <ArrowRight size={16} /></button>{formMessage && <p className="form-error" role="alert">{formMessage}</p>}<p className="secure-note"><LockKeyhole size={15} /> Transfers are protected by merchant verification.</p></div><div className="panel side-info-panel transfer-side"><span className="info-symbol blue-bg"><ArrowUpRight size={19} /></span><h3>Transfer safely</h3><p>Choose the right account before sending funds. You can review the recipient and fees before confirming.</p><div className="limit-card"><span>Daily transfer limit</span><strong>2,000,000 FCFA</strong><div className="limit-bar"><span /></div><small>1,714,000 FCFA remaining today</small></div></div></div>}</div>;
 }
 
 function TransferReview({ amount, beneficiary, source, onBack, onConfirm }) {
@@ -803,31 +1228,28 @@ function ProcessingState({ label, detail }) {
   return <div className="panel state-panel"><span className="loading-symbol"><LoaderCircle size={30} /></span><h3>{label}</h3><p>{detail}</p></div>;
 }
 
-function SuccessState({ type, amount, customer, reset, showToast, openTransaction }) {
-  const transaction = { id: "OM-DEP-845291", name: customer, type: "Deposit", amount: `+ ${formatNumber(amount)}`, time: "Just now", date: "Just now", status: "Saved locally", tone: "success", channel: "Workspace deposit", reference: "OM-DEP-845291", details: { "Customer phone": `+226 ${customer}`, "Processing fee": "0 FCFA" }, icon: ArrowDownLeft };
-  return <div className="panel state-panel success-panel"><span className="state-symbol success-symbol"><Check size={30} /></span><span className="eyebrow">Deposit saved</span><h3>Your local deposit record is ready</h3><p>No provider was contacted and no real funds were moved.</p><div className="success-receipt"><div><span>Amount</span><strong>{formatNumber(amount)} <small>FCFA</small></strong></div><div><span>Customer</span><strong>{customer}</strong></div><div><span>Reference</span><strong>{transaction.reference}</strong></div></div><div className="review-actions"><button className="outline-button" onClick={reset}>Make another deposit</button><button className="outline-button" onClick={() => openTransaction ? openTransaction(transaction) : showToast("Transaction details opened")}><ReceiptText size={16} /> View details</button></div></div>;
+function SuccessState({ transaction: savedTransaction, type, amount, customer, reset, showToast, openTransaction }) {
+  const transaction = savedTransaction || { id: "OM-DEP-845291", name: customer, type: "Deposit", amount: `+ ${formatNumber(amount)}`, time: "Just now", date: "Just now", status: "Saved", tone: "success", channel: "Workspace deposit", reference: "OM-DEP-845291", details: { "Customer phone": `+226 ${customer}`, "Processing fee": "0 FCFA" }, icon: ArrowDownLeft };
+  return <div className="panel state-panel success-panel"><span className="state-symbol success-symbol"><Check size={30} /></span><span className="eyebrow">Deposit saved</span><h3>Your deposit record is ready</h3><p>No provider was contacted and no real funds were moved.</p><div className="success-receipt"><div><span>Amount</span><strong>{formatNumber(amount)} <small>FCFA</small></strong></div><div><span>Customer</span><strong>{customer}</strong></div><div><span>Reference</span><strong>{transaction.reference}</strong></div></div><div className="review-actions"><button className="outline-button" onClick={reset}>Make another deposit</button><button className="outline-button" onClick={() => openTransaction ? openTransaction(transaction) : showToast("Transaction details opened")}><ReceiptText size={16} /> View details</button></div></div>;
 }
 
 function QrView({ showToast }) {
   const [tab, setTab] = useState("display");
-  return <div className="standard-view"><PageIntro eyebrow="Payments" title="QR payments" description="Let customers pay instantly by scanning your merchant QR code." action={<button className="soft-button" onClick={() => showToast("QR image downloaded")}><Download size={16} /> Download QR</button>} /><div className="tab-bar"><button className={tab === "display" ? "active" : ""} onClick={() => setTab("display")}><QrCode size={16} /> My merchant QR</button><button className={tab === "scan" ? "active" : ""} onClick={() => setTab("scan")}><ScanLine size={16} /> Scan to verify</button></div>{tab === "display" ? <div className="qr-layout"><div className="panel qr-card"><div className="qr-card-top"><div><span className="eyebrow">Your payment code</span><h3>Sahel Market</h3><p>Customers can scan this code to pay you.</p></div><span className="verified-badge"><ShieldCheck size={14} /> Verified</span></div><div className="qr-frame"><QrGraphic /><div className="qr-center-mark orange-qr-center"><OrangeQrLogo /></div></div><div className="qr-code-label">sahel.market <span>·</span> 104 82 93</div><div className="qr-actions"><button className="primary-button" onClick={() => showToast("Share link copied to clipboard")}><Copy size={16} /> Share QR</button><button className="outline-button" onClick={() => showToast("QR image downloaded")}><Download size={16} /> Save image</button></div></div><div className="panel qr-guide"><span className="info-symbol dark-bg"><QrCode size={19} /></span><h3>How customers pay</h3><div className="qr-guide-step"><span>01</span><div><strong>Open their payment app</strong><p>They select “Pay by QR” on their phone.</p></div></div><div className="qr-guide-step"><span>02</span><div><strong>Scan your code</strong><p>Your store details appear immediately.</p></div></div><div className="qr-guide-step"><span>03</span><div><strong>Confirm the amount</strong><p>You’ll see the payment in Activity.</p></div></div><button className="text-button" onClick={() => setTab("scan")}>Verify a payment <ArrowRight size={15} /></button></div></div> : <VerifyView showToast={showToast} embedded />}</div>;
+  const copyPayload = async () => {
+    try {
+      await navigator.clipboard?.writeText(merchantQrPayload);
+      showToast("QR account payload copied");
+    } catch {
+      showToast("QR account payload ready to share");
+    }
+  };
+  return <div className="standard-view"><PageIntro eyebrow="Payments" title="QR payments" description="Let customers pay instantly by scanning your merchant QR code." action={<button className="soft-button" onClick={() => showToast("QR image ready to save")}><Download size={16} /> Download QR</button>} /><div className="tab-bar"><button className={tab === "display" ? "active" : ""} onClick={() => setTab("display")}><QrCode size={16} /> My merchant QR</button><button className={tab === "scan" ? "active" : ""} onClick={() => setTab("scan")}><ScanLine size={16} /> Scan to verify</button></div>{tab === "display" ? <div className="qr-layout"><div className="panel qr-card"><div className="qr-card-top"><div><span className="eyebrow">Your payment code</span><h3>{merchantAccount.name}</h3><p>Customers can scan this code to pay you.</p></div><span className="verified-badge"><ShieldCheck size={14} /> Account QR</span></div><div className="qr-frame"><QrGraphic payload={merchantQrPayload} /><div className="qr-center-mark orange-qr-center"><OrangeQrLogo /></div></div><div className="qr-code-label">Account <strong>{merchantAccount.displayNumber}</strong><span>·</span> Encoded account number</div><div className="qr-actions"><button className="primary-button" onClick={copyPayload}><Copy size={16} /> Share QR</button><button className="outline-button" onClick={() => showToast("QR image ready to save")}><Download size={16} /> Save image</button></div></div><div className="panel qr-guide"><span className="info-symbol dark-bg"><QrCode size={19} /></span><h3>How customers pay</h3><div className="qr-guide-step"><span>01</span><div><strong>Open their payment app</strong><p>They select “Pay by QR” on their phone.</p></div></div><div className="qr-guide-step"><span>02</span><div><strong>Scan your code</strong><p>Your store details appear immediately.</p></div></div><div className="qr-guide-step"><span>03</span><div><strong>Confirm the amount</strong><p>You’ll see the payment in Activity.</p></div></div><button className="text-button" onClick={() => setTab("scan")}>Verify a payment <ArrowRight size={15} /></button></div></div> : <VerifyView showToast={showToast} embedded />}</div>;
 }
 
-function QrGraphic() {
-  const size = 21;
-  const isFinder = (x, y, startX, startY) => x >= startX && x < startX + 7 && y >= startY && y < startY + 7;
-  const isFilled = (x, y) => {
-    const finders = [[0, 0], [size - 7, 0], [0, size - 7]];
-    const finder = finders.find(([startX, startY]) => isFinder(x, y, startX, startY));
-    if (finder) {
-      const [startX, startY] = finder;
-      const edge = x === startX || x === startX + 6 || y === startY || y === startY + 6;
-      return edge || (x >= startX + 2 && x <= startX + 4 && y >= startY + 2 && y <= startY + 4);
-    }
-    return ((x * 17 + y * 29 + x * y * 7 + 11) % 13) < 6;
-  };
-  const squares = Array.from({ length: size * size });
-  return <div className="qr-graphic" style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }} aria-label="Merchant QR code">{squares.map((_, index) => { const x = index % size; const y = Math.floor(index / size); return <span key={index} className={isFilled(x, y) ? "filled" : ""} />; })}</div>;
+function QrGraphic({ payload = merchantQrPayload }) {
+  const qrCode = QRCode.create(payload, { errorCorrectionLevel: "M" });
+  const { size, data } = qrCode.modules;
+  return <div className="qr-graphic" style={{ gridTemplateColumns: `repeat(${size}, 1fr)`, gridTemplateRows: `repeat(${size}, 1fr)` }} data-qr-payload={payload} aria-label={`Merchant QR code for account ${merchantAccount.displayNumber}`}>{data.map((filled, index) => <span key={index} className={filled ? "filled" : ""} />)}</div>;
 }
 
 function RegisterView({ showToast }) {
@@ -906,44 +1328,40 @@ function ActivityView({ showToast, openTransaction }) {
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [loadAttempt]);
-  const savedItems = savedEvents.filter((event) => event.payload?.flowId === "deposit-local").map((event) => {
+  const savedItems = savedEvents.filter((event) => event.payload?.flowId).map((event) => {
     const payload = event.payload || {};
-    const amount = Number(payload.amount) > 0 ? `${formatNumber(payload.amount)} FCFA` : "";
-    const title = payload.message || (event.event_type === "navigation" ? `Opened ${event.view_id}` : event.event_type.replaceAll("_", " "));
-    const isTransfer = payload.flowId === "transfer";
-    const eventTransaction = event.event_type.includes("completed") ? {
-      id: payload.reference || `OM-${isTransfer ? "TRF" : "PAY"}-${event.id}`,
-      name: payload.beneficiary || payload.merchant || (payload.phone ? `+226 ${payload.phone}` : "Deposit customer"),
-      type: "Deposit",
-      amount: `${isTransfer ? "−" : "+"} ${formatNumber(payload.amount)}`,
-      time: new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      date: new Date(event.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }),
-      status: "Completed",
-      tone: isTransfer ? "neutral" : "success",
-      channel: isTransfer ? "Merchant transfer" : "Checkout",
-      reference: payload.reference || `OM-${isTransfer ? "TRF" : "PAY"}-${event.id}`,
-      details: payload.phone ? { "Phone number": `+226 ${payload.phone}` } : {},
-      icon: isTransfer ? ArrowUpRight : ArrowDownLeft,
-    } : null;
+    const amountNumber = Number(payload.amount || payload.fields?.amount || 0);
+    const title = payload.title || payload.message || payload.recordType || event.event_type.replaceAll("_", " ");
+    const eventTransaction = localTransactionFromEvent(event);
+    const amount = eventTransaction.amount || (amountNumber > 0 ? `${formatNumber(amountNumber)} FCFA` : "");
     return {
       title: title.charAt(0).toUpperCase() + title.slice(1),
-      detail: `${event.view_id} · Saved to database`,
+      detail: `${payload.status === "Saved locally" ? "Saved" : (payload.status || "Saved")} · ${event.view_id}`,
       amount,
       time: new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      icon: event.event_type.includes("completed") ? Check : Clock3,
-      tone: event.event_type.includes("completed") ? "success" : "blue",
+      icon: eventTransaction.icon || Check,
+      tone: eventTransaction.tone || "success",
       transaction: eventTransaction,
     };
   });
+  const illustrativeItems = currentMonthHistory.map((transaction) => ({
+    title: transaction.type,
+    detail: `${transaction.status} · ${transaction.name}`,
+    amount: transaction.amount,
+    time: transaction.time,
+    icon: transaction.icon,
+    tone: transaction.tone,
+    transaction,
+  }));
   const staticItems = activityEvents.map((group) => ({ ...group, items: group.items.map((item) => ({ ...item, transaction: item.transactionId ? transactions.find((transaction) => transaction.id === item.transactionId) : null })) }));
-  const eventGroups = savedItems.length ? [{ date: "Saved in database", items: savedItems }, ...staticItems] : staticItems;
+   const eventGroups = [{ date: "This month · illustrative history", items: illustrativeItems }, ...(savedItems.length ? [{ date: "Saved records", items: savedItems }] : []), ...staticItems];
   const searchQuery = query.trim().toLowerCase();
   const filtered = eventGroups.map((group) => ({ ...group, items: group.items.filter((item) => {
     const matchesCategory = filter === "All activity" || (filter === "Payments" && item.title.includes("Payment")) || (filter === "Transfers" && item.title.includes("Transfer")) || (filter === "Operations" && !item.title.includes("Payment") && !item.title.includes("Transfer"));
     const matchesQuery = !searchQuery || `${item.title} ${item.detail} ${item.amount}`.toLowerCase().includes(searchQuery);
     return matchesCategory && matchesQuery;
   }) })).filter((group) => group.items.length);
-  return <div className="standard-view"><PageIntro eyebrow="Merchant activity" title="Activity" description="Live deposits and account events will appear here after connection." action={<button className="outline-button" onClick={() => showToast("Activity export is unavailable until a live account is connected")}><Download size={16} /> Export activity</button>} /><div className="activity-toolbar"><div className="search-field"><Search size={17} /><input aria-label="Search activity" placeholder="Search activity" value={query} onChange={(event) => setQuery(event.target.value)} /></div><div className="filter-pills" role="tablist" aria-label="Activity categories">{["All activity", "Payments", "Transfers", "Operations"].map((item) => <button role="tab" aria-selected={filter === item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)} key={item}>{item}</button>)}</div><button className={`outline-button filter-button ${filtersOpen ? "selected" : ""}`} onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}><Filter size={16} /> Filters</button></div>{filtersOpen && <div className="filter-panel"><label>Date range<select value={dateRange} onChange={(event) => { setDateRange(event.target.value); showToast(`Date range set to ${event.target.value}`); }}><option>All dates</option><option>Today</option><option>Last 7 days</option><option>This month</option></select></label><button className="text-button" onClick={() => { setDateRange("All dates"); setFilter("All activity"); setQuery(""); showToast("Activity filters cleared"); }}>Clear filters <X size={14} /></button></div>}{loading ? <ActivitySkeleton /> : loadError ? <div className="panel error-state" role="alert"><CircleHelp size={20} /><h3>We couldn’t load activity</h3><p>{loadError}</p><button className="outline-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button></div> : <div className="activity-timeline">{filtered.length ? filtered.map((group) => <div className="timeline-group" key={group.date}><h3>{group.date}</h3>{group.items.map((item, index) => { const Icon = item.icon; return <button className="timeline-item" key={`${group.date}-${index}`} onClick={() => item.transaction ? openTransaction(item.transaction) : showToast(`${item.title} details opened`)}><div className={`timeline-icon ${item.tone}`}><Icon size={16} /></div><div className="timeline-copy"><strong>{item.title}</strong><p>{item.detail}</p></div><div className="timeline-amount"><strong className={item.amount.startsWith("+") ? "positive" : ""}>{item.amount}</strong><span>{item.time}</span></div><ChevronRight size={16} /></button>; })}</div>) : <div className="panel empty-state"><span className="empty-icon"><Search size={22} /></span><h3>No activity found</h3><p>Live activity will appear after a connected deposit or merchant event.</p></div>}</div>}</div>;
+  return <div className="standard-view"><PageIntro eyebrow="Merchant activity" title="Activity" description="Review this month’s account history and saved workspace records." action={<button className="outline-button" onClick={() => showToast("Activity export is not available yet")}><Download size={16} /> Export activity</button>} /><div className="activity-toolbar"><div className="search-field"><Search size={17} /><input aria-label="Search activity" placeholder="Search activity" value={query} onChange={(event) => setQuery(event.target.value)} /></div><div className="filter-pills" role="tablist" aria-label="Activity categories">{["All activity", "Payments", "Transfers", "Operations"].map((item) => <button role="tab" aria-selected={filter === item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)} key={item}>{item}</button>)}</div><button className={`outline-button filter-button ${filtersOpen ? "selected" : ""}`} onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}><Filter size={16} /> Filters</button></div>{filtersOpen && <div className="filter-panel"><label>Date range<select value={dateRange} onChange={(event) => { setDateRange(event.target.value); showToast(`Date range set to ${event.target.value}`); }}><option>All dates</option><option>Today</option><option>Last 7 days</option><option>This month</option></select></label><button className="text-button" onClick={() => { setDateRange("All dates"); setFilter("All activity"); setQuery(""); showToast("Activity filters cleared"); }}>Clear filters <X size={14} /></button></div>}{loading ? <ActivitySkeleton /> : loadError ? <div className="panel error-state" role="alert"><CircleHelp size={20} /><h3>We couldn’t load activity</h3><p>{loadError}</p><button className="outline-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button></div> : <div className="activity-timeline">{filtered.length ? filtered.map((group) => <div className="timeline-group" key={group.date}><h3>{group.date}</h3>{group.items.map((item, index) => { const Icon = item.icon; return <button className="timeline-item" key={`${group.date}-${index}`} onClick={() => item.transaction ? openTransaction(item.transaction) : showToast(`${item.title} details opened`)}><div className={`timeline-icon ${item.tone}`}><Icon size={16} /></div><div className="timeline-copy"><strong>{item.title}</strong><p>{item.detail}</p></div><div className="timeline-amount"><strong className={item.amount.startsWith("+") ? "positive" : ""}>{item.amount}</strong><span>{item.time}</span></div><ChevronRight size={16} /></button>; })}</div>) : <div className="panel empty-state"><span className="empty-icon"><Search size={22} /></span><h3>No activity found</h3><p>Create a record from Collections, Transfers, QR, or another workspace tool.</p></div>}</div>}</div>;
 }
 
 function ActivitySkeleton() {
@@ -966,6 +1384,9 @@ function VerifyView({ showToast, embedded = false }) {
 
 function ProfileView({ showToast }) {
   const [language, setLanguage] = useState("Français");
+  const [workspaceName, setWorkspaceName] = useState("Merchant workspace");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("Merchant workspace");
   const [loading, setLoading] = useState(true);
   const [settingsError, setSettingsError] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -980,16 +1401,39 @@ function ProfileView({ showToast }) {
       })
       .then((data) => {
         const savedLanguage = data.settings?.find((setting) => setting.setting_key === "language")?.setting_value;
+        const savedName = data.settings?.find((setting) => setting.setting_key === "workspace_name")?.setting_value;
         if (mounted && typeof savedLanguage === "string") setLanguage(savedLanguage);
+        if (mounted && typeof savedName === "string") {
+          setWorkspaceName(savedName);
+          setNameDraft(savedName);
+        }
       })
       .catch((error) => { console.error(error); if (mounted) setSettingsError("Preferences could not be loaded."); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [loadAttempt]);
-  const showSetting = (name) => showToast(`${name} is unavailable until a live merchant account is connected`);
+  const showSetting = (name) => {
+    const key = `preference_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
+    persistSetting(key, { enabled: true, updatedAt: new Date().toISOString() }).then(() => showToast(`${name} preference saved`)).catch((error) => {
+      console.error(error);
+      showToast(`${name} preference could not be saved`);
+    });
+  };
+  const saveWorkspaceName = () => {
+    const nextName = nameDraft.trim();
+    if (!nextName) return;
+    persistSetting("workspace_name", nextName).then(() => {
+      setWorkspaceName(nextName);
+      setEditingName(false);
+      showToast("Workspace name saved");
+    }).catch((error) => {
+      console.error(error);
+      showToast("Workspace name could not be saved");
+    });
+  };
   if (loading) return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." /><ProfileSkeleton /></div>;
   if (settingsError) return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." /><div className="panel error-state" role="alert"><CircleHelp size={20} /><h3>We couldn’t load settings</h3><p>{settingsError}</p><button className="outline-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button></div></div>;
-  return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." action={<button className="outline-button" onClick={() => showToast("Support center is unavailable until an account is connected")}><CircleHelp size={16} /> Help center</button>} /><div className="profile-layout"><div className="panel profile-card"><div className="profile-cover" /><div className="profile-card-body"><div className="profile-avatar xl">M</div><span className="verified-badge"><ShieldCheck size={14} /> Account setup required</span><h3>Merchant profile</h3><p>Connect a live merchant account to load profile details.</p><button className="outline-button" onClick={() => showToast("Profile editing is unavailable until an account is connected")}>Edit profile</button><div className="profile-contact"><div><Smartphone size={16} /><span>Live phone number unavailable</span></div><div><BriefcaseBusiness size={16} /><span>Merchant ID unavailable</span></div></div></div></div><div className="settings-sections"><SettingsSection title="Business account" items={[["Business details", "Connect an account to view details", Store], ["Account information", "Live account required", WalletCards], ["Team members", "Live account required", UsersRound]]} onSelect={showSetting} /></div><div className="settings-sections"><SettingsSection title="Security & preferences" items={[["Security", "Live authentication required", ShieldCheck], ["Notifications", "Live account required", Bell]]} onSelect={showSetting} /><div className="setting-row language-row"><span className="setting-icon"><Settings2 size={17} /></span><div><strong>Language</strong><small>Choose your preferred language</small></div><select aria-label="Language" value={language} onChange={(event) => { setLanguage(event.target.value); persistSetting("language", event.target.value).then(() => showToast(`Language set to ${event.target.value}`)).catch((error) => { console.error(error); showToast("Language could not be saved"); }); }}><option>Français</option><option>English</option></select></div></div></div></div>;
+  return <div className="standard-view"><PageIntro eyebrow="Workspace preferences" title="Profile & settings" description="Manage your merchant identity, security, and notifications." action={<button className="outline-button" onClick={() => showToast("Support center opened")}><CircleHelp size={16} /> Help center</button>} /><div className="profile-layout"><div className="panel profile-card"><div className="profile-cover" /><div className="profile-card-body"><div className="profile-avatar xl">M</div><span className="verified-badge"><ShieldCheck size={14} /> Workspace profile</span><h3>{workspaceName}</h3><p>Workspace identity and preferences are saved here.</p>{editingName ? <div className="profile-edit-form"><input aria-label="Workspace name" value={nameDraft} onChange={(event) => setNameDraft(event.target.value)} /><div className="review-actions"><button className="outline-button" onClick={() => { setEditingName(false); setNameDraft(workspaceName); }}>Cancel</button><button className="primary-button" onClick={saveWorkspaceName}>Save</button></div></div> : <button className="outline-button" onClick={() => setEditingName(true)}><Pencil size={15} /> Edit workspace</button>}<div className="profile-contact"><div><Smartphone size={16} /><span>Phone number · Workspace record</span></div><div><BriefcaseBusiness size={16} /><span>Merchant ID · Workspace record</span></div></div></div></div><div className="settings-sections"><SettingsSection title="Business account" items={[["Business details", "Save a preference", Store], ["Account information", "Account details in this workspace", WalletCards], ["Team members", "Save a preference", UsersRound]]} onSelect={showSetting} /></div><div className="settings-sections"><SettingsSection title="Security & preferences" items={[["Security", "Security settings", ShieldCheck], ["Notifications", "Save a preference", Bell]]} onSelect={showSetting} /><div className="setting-row language-row"><span className="setting-icon"><Settings2 size={17} /></span><div><strong>Language</strong><small>Choose your preferred language</small></div><select aria-label="Language" value={language} onChange={(event) => { setLanguage(event.target.value); persistSetting("language", event.target.value).then(() => showToast(`Language set to ${event.target.value}`)).catch((error) => { console.error(error); showToast("Language could not be saved"); }); }}><option>Français</option><option>English</option></select></div></div></div></div>;
 }
 
 function ProfileSkeleton() {
